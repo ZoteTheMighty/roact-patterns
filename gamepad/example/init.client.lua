@@ -7,18 +7,19 @@ local Roact = require(Modules.Roact)
 local Gamepad = require(Modules.Gamepad)
 
 local ButtonList = require(script.ButtonList)
+local Rooter = require(script.Rooter)
 
 local e = Roact.createElement
 
 local topButtons = {
 	{
-		text = "Foo",
+		text = "Spooky",
 	},
 	{
-		text = "Bar",
+		text = "Scary",
 	},
 	{
-		text = "Baz",
+		text = "Skeletons",
 	},
 }
 
@@ -34,29 +35,30 @@ local bottomButtons = {
 local TabNavigation = Roact.Component:extend("TabNavigation")
 
 function TabNavigation:init()
-	self.group = Gamepad.createSelectionItem(self)
+	self.topRef = Roact.createRef()
+	self.bottomRef = Roact.createRef()
+
+	self.group = Gamepad.createSelectionItem(self.topRef)
+	self.onRooted = self.group:getOnSelected()
 end
 
 function TabNavigation:render()
-	-- Gotcha: selectionGroupId passed to ButtonList has an implicit connection
-	-- to `self.group` via context. If a component is created by TabNavigation
-	-- that ALSO specifies a selection item, however, the IDs will be assigned
-	-- to that object instead, which is confusing!
-	--
-	-- This is similar to the issues that React used to have with string refs.
 	return e("Frame", {
 		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundColor3 = Color3.new(0.2, 0.2, 0.2),
 	}, {
+		Rooter = e(Rooter, {
+			rooted = self.onRooted,
+		}),
 		Navigation = e("Frame", {
 			Size = UDim2.new(1, 0, 0, 60),
 			BackgroundColor3 = Color3.new(0.1, 0.1, 0.1),
 		}, {
 			Buttons = e(ButtonList, {
-				selectionGroupId = "Top",
 				buttons = topButtons,
-				selectionUp = self.group:getRedirectObject("Bottom"),
-				selectionDown = self.group:getRedirectObject("Bottom"),
+
+				[Roact.Ref] = self.topRef,
+				selectionDown = self.bottomRef,
 			}),
 		}),
 		Body = e("Frame", {
@@ -65,10 +67,10 @@ function TabNavigation:render()
 			BackgroundColor3 = Color3.new(0.3, 0.3, 0.3),
 		}, {
 			Buttons = e(ButtonList, {
-				selectionGroupId = "Bottom",
 				buttons = bottomButtons,
-				selectionUp = self.group:getRedirectObject("Top"),
-				selectionDown = self.group:getRedirectObject("Top"),
+
+				[Roact.Ref] = self.bottomRef,
+				selectionUp = self.topRef,
 			}),
 		})
 	})
@@ -80,4 +82,4 @@ local function App(props)
 	})
 end
 
-Roact.mount(Roact.createElement(App), Players.LocalPlayer.PlayerGui, "Gamepad")
+Roact.mount(Roact.createElement(App), Players.LocalPlayer:WaitForChild("PlayerGui"), "Gamepad")

@@ -15,8 +15,7 @@ function SelectableButton:init()
 	-- was with function refs. Maybe Roact should provide an API for this?
 	self.ref = self.props.style[Roact.Ref] or Roact.createRef()
 
-	local group = Gamepad.createSelectionItem(self, self.props.selectionId)
-	group:setDefaultSelection(self.ref)
+	Gamepad.createSelectionItem(self.ref)
 
 	self.state = {
 		selected = false,

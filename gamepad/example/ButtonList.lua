@@ -29,8 +29,8 @@ local ButtonList = Roact.Component:extend("ButtonList")
 function ButtonList:init()
 	self.buttonRefs = createRefCache()
 
-	self.group = Gamepad.createSelectionItem(self, self.props.selectionGroupId)
-	self.group:setDefaultSelection(1)
+	self.group = Gamepad.createSelectionItem(self.buttonRefs[1])
+	self.redirectToChildren = self.group:getOnSelected()
 end
 
 function ButtonList:render()
@@ -50,23 +50,21 @@ function ButtonList:render()
 		local previousSibling = ((index - 2) % #buttons) + 1
 		local nextSibling = (index % #buttons) + 1
 
+		local buttonRef = self.buttonRefs[index]
+
 		children[index] = Roact.createElement(SelectableButton, {
 			selectionId = index,
 			style = {
 				Text = button.text,
 				LayoutOrder = index,
-				NextSelectionUp = selectionUp,
-				NextSelectionDown = selectionDown,
+				NextSelectionUp = selectionUp or buttonRef,
+				NextSelectionDown = selectionDown or buttonRef,
 
-				-- Once Roact has support for unidirectional bindings for refs,
-				-- we can change these lines to:
-				-- NextSelectionLeft = self.buttonRefs[previousSibling],
-				-- NextSelectionRight = self.buttonRefs[nextSibling],
+				-- Inverted from expectations, to help us confirm that its not just default selection logic
+				NextSelectionRight = self.buttonRefs[previousSibling],
+				NextSelectionLeft = self.buttonRefs[nextSibling],
 
-				NextSelectionLeft = Gamepad.redirectToRef(self.buttonRefs[previousSibling]),
-				NextSelectionRight = Gamepad.redirectToRef(self.buttonRefs[nextSibling]),
-
-				[Roact.Ref] = self.buttonRefs[index],
+				[Roact.Ref] = buttonRef,
 			},
 			selectedStyle = {
 				BackgroundColor3 = Color3.new(1, 0, 0),
@@ -77,6 +75,9 @@ function ButtonList:render()
 	return Roact.createElement("Frame", {
 		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundTransparency = 1,
+
+		[Roact.Ref] = self.props[Roact.Ref],
+		[Roact.Event.SelectionGained] = self.redirectToChildren,
 	}, children)
 end
 
