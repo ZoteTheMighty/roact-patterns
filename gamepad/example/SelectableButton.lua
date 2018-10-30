@@ -3,7 +3,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Modules = ReplicatedStorage.Modules
 
 local Roact = require(Modules.Roact)
-local Gamepad = require(Modules.Gamepad)
 
 local assign = require(script.Parent.assign)
 
@@ -14,8 +13,6 @@ function SelectableButton:init()
 	-- object-style refs, sharing a ref with your parent is not as easy as it
 	-- was with function refs. Maybe Roact should provide an API for this?
 	self.ref = self.props.style[Roact.Ref] or Roact.createRef()
-
-	Gamepad.createSelectionItem(self.ref)
 
 	self.state = {
 		selected = false,
