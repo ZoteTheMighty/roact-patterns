@@ -43,8 +43,8 @@ function ButtonList:render()
 				NextSelectionDown = selectionDown,
 
 				-- Inverted from expectations, to help us confirm that its not just default selection logic
-				NextSelectionRight = self.group.childRefs[previousSibling],
-				NextSelectionLeft = self.group.childRefs[nextSibling],
+				NextSelectionLeft = self.group.childRefs[previousSibling],
+				NextSelectionRight = self.group.childRefs[nextSibling],
 
 				[Roact.Ref] = self.group.childRefs[index],
 			},
