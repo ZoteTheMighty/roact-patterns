@@ -50,23 +50,23 @@ function TabNavigation:render()
 		Rooter = e(Rooter, {
 			rooted = self.onRooted,
 		}),
-		Navigation = e("Frame", {
+		NavigationFrame = e("Frame", {
 			Size = UDim2.new(1, 0, 0, 60),
 			BackgroundColor3 = Color3.new(0.1, 0.1, 0.1),
 		}, {
-			Buttons = e(ButtonList, {
+			NavButtons = e(ButtonList, {
 				buttons = topButtons,
 
 				[Roact.Ref] = self.topRef,
 				selectionDown = self.bottomRef,
 			}),
 		}),
-		Body = e("Frame", {
+		BodyFrame = e("Frame", {
 			Size = UDim2.new(1, 0, 1, -60),
 			Position = UDim2.new(0, 0, 0, 60),
 			BackgroundColor3 = Color3.new(0.3, 0.3, 0.3),
 		}, {
-			Buttons = e(ButtonList, {
+			BodyButtons = e(ButtonList, {
 				buttons = bottomButtons,
 
 				[Roact.Ref] = self.bottomRef,

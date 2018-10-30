@@ -50,21 +50,20 @@ function ButtonList:render()
 		local previousSibling = ((index - 2) % #buttons) + 1
 		local nextSibling = (index % #buttons) + 1
 
-		local buttonRef = self.buttonRefs[index]
-
 		children[index] = Roact.createElement(SelectableButton, {
 			selectionId = index,
 			style = {
 				Text = button.text,
 				LayoutOrder = index,
-				NextSelectionUp = selectionUp or buttonRef,
-				NextSelectionDown = selectionDown or buttonRef,
+				-- If either of these are nil, SelectableButton will make them loop back
+				NextSelectionUp = selectionUp,
+				NextSelectionDown = selectionDown,
 
 				-- Inverted from expectations, to help us confirm that its not just default selection logic
 				NextSelectionRight = self.buttonRefs[previousSibling],
 				NextSelectionLeft = self.buttonRefs[nextSibling],
 
-				[Roact.Ref] = buttonRef,
+				[Roact.Ref] = self.buttonRefs[index],
 			},
 			selectedStyle = {
 				BackgroundColor3 = Color3.new(1, 0, 0),

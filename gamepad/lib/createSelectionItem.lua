@@ -3,6 +3,11 @@ local GuiService = game:GetService("GuiService")
 local SelectionItem = {}
 SelectionItem.__index = SelectionItem
 
+-- TODO:
+-- * implement persistent selection state
+-- * find way to support bumper/alternate nav
+-- * paradigm for hierarchical selection
+
 function SelectionItem:getOnSelected()
 	return function()
 		print("Select default:", tostring(self.__defaultSelection))
@@ -16,7 +21,7 @@ end
 
 local function createSelectionItem(defaultSelection)
 	return setmetatable({
-		__defaultSelection = defaultSelection
+		__defaultSelection = defaultSelection,
 	}, SelectionItem)
 end
 
