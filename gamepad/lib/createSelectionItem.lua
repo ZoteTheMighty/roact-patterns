@@ -8,14 +8,12 @@ SelectionItem.__index = SelectionItem
 -- * find way to support bumper/alternate nav
 -- * paradigm for hierarchical selection
 
-function SelectionItem:getOnSelected()
-	return function()
-		print("Select default:", tostring(self.__defaultSelection))
-		if typeof(self.__defaultSelection) == "table" then
-			GuiService.SelectedObject = self.__defaultSelection.current
-		elseif self.__defaultSelection ~= nil then
-			GuiService.SelectedObject = self.__defaultSelection
-		end
+function SelectionItem:selectDefault()
+	print("Select default:", tostring(self.__defaultSelection))
+	if typeof(self.__defaultSelection) == "table" then
+		GuiService.SelectedObject = self.__defaultSelection.current
+	elseif self.__defaultSelection ~= nil then
+		GuiService.SelectedObject = self.__defaultSelection
 	end
 end
 

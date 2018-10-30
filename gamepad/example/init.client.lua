@@ -39,7 +39,6 @@ function TabNavigation:init()
 	self.bottomRef = Roact.createRef()
 
 	self.group = Gamepad.createSelectionItem(self.topRef)
-	self.onRooted = self.group:getOnSelected()
 end
 
 function TabNavigation:render()
@@ -48,7 +47,9 @@ function TabNavigation:render()
 		BackgroundColor3 = Color3.new(0.2, 0.2, 0.2),
 	}, {
 		Rooter = e(Rooter, {
-			rooted = self.onRooted,
+			rooted = function()
+				self.group:selectDefault()
+			end,
 		}),
 		NavigationFrame = e("Frame", {
 			Size = UDim2.new(1, 0, 0, 60),

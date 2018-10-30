@@ -28,9 +28,9 @@ local ButtonList = Roact.Component:extend("ButtonList")
 
 function ButtonList:init()
 	self.buttonRefs = createRefCache()
+	self.buttonRefs[1] = self.props[Roact.Ref]
 
 	self.group = Gamepad.createSelectionItem(self.buttonRefs[1])
-	self.redirectToChildren = self.group:getOnSelected()
 end
 
 function ButtonList:render()
@@ -74,9 +74,6 @@ function ButtonList:render()
 	return Roact.createElement("Frame", {
 		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundTransparency = 1,
-
-		[Roact.Ref] = self.props[Roact.Ref],
-		[Roact.Event.SelectionGained] = self.redirectToChildren,
 	}, children)
 end
 
