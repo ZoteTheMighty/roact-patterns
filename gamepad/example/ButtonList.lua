@@ -7,29 +7,13 @@ local Gamepad = require(Modules.Gamepad)
 
 local SelectableButton = require(script.Parent.SelectableButton)
 
--- This is a handy trick to allow us to reference refs before we've actually
--- rendered anything, and without duplicating rendering logic!
-local function createRefCache()
-	local self = {}
-
-	setmetatable(self, {
-		__index = function(_, key)
-			local newRef = Roact.createRef()
-			self[key] = newRef
-
-			return newRef
-		end,
-	})
-
-	return self
-end
-
 local ButtonList = Roact.Component:extend("ButtonList")
 
 function ButtonList:init()
-	self.buttonRefs = createRefCache()
+	local persist = self.props.persist
 
-	self.group = Gamepad.createSelectionGroup(self.buttonRefs[1])
+	self.group = Gamepad.createSelectionGroup(persist)
+	self.group:setDefault(self.group.childRefs[1])
 end
 
 function ButtonList:render()
@@ -59,10 +43,10 @@ function ButtonList:render()
 				NextSelectionDown = selectionDown,
 
 				-- Inverted from expectations, to help us confirm that its not just default selection logic
-				NextSelectionRight = self.buttonRefs[previousSibling],
-				NextSelectionLeft = self.buttonRefs[nextSibling],
+				NextSelectionRight = self.group.childRefs[previousSibling],
+				NextSelectionLeft = self.group.childRefs[nextSibling],
 
-				[Roact.Ref] = self.buttonRefs[index],
+				[Roact.Ref] = self.group.childRefs[index],
 			},
 			selectedStyle = {
 				BackgroundColor3 = Color3.new(1, 0, 0),
@@ -75,12 +59,12 @@ function ButtonList:render()
 		BackgroundTransparency = 1,
 
 		[Roact.Ref] = self.props[Roact.Ref],
-		[Roact.Event.SelectionGained] = self.group:getGroupSelectionCallback()
+		[Roact.Event.SelectionGained] = self.group:getGroupSelectedCallback()
 	}, children)
 end
 
-function ButtonList:didMount()
-	self.group:updateChildren(self.buttonRefs)
+function ButtonList:willUnmount()
+	self.group:destruct()
 end
 
 return ButtonList

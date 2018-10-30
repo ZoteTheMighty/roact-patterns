@@ -1,16 +1,29 @@
 local GuiService = game:GetService("GuiService")
-local HttpService = game:GetService("HttpService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local function getId(id)
-	if id == nil then
-		id = HttpService:GenerateGUID(false)
-	end
+local Modules = ReplicatedStorage.Modules
 
-	return id
+local Roact = require(Modules.Roact)
+
+-- This is a handy trick to allow us to reference refs before we've actually
+-- rendered anything, and without duplicating rendering logic!
+local function createRefCache()
+	local refCache = {}
+
+	setmetatable(refCache, {
+		__index = function(_, key)
+			local newRef = Roact.createRef()
+			refCache[key] = newRef
+
+			return newRef
+		end,
+	})
+
+	return refCache
 end
 
 local function DEBUG_printChildren(children)
-	for child, name in pairs(children) do
+	for name, child in pairs(children) do
 		print(tostring(name), "-", tostring(child))
 	end
 end
@@ -26,10 +39,12 @@ function SelectionGroup:__selectChild(refOrId)
 	local childRef = refOrId
 
 	if typeof(refOrId) ~= "table" then
-		childRef = self.__children[refOrId]
+		childRef = self.childRefs[refOrId]
 	end
 
-	GuiService.SelectedObject = childRef.current
+	if childRef ~= nil then
+		GuiService.SelectedObject = childRef.current
+	end
 end
 
 function SelectionGroup:__connectToGuiService()
@@ -39,7 +54,7 @@ function SelectionGroup:__connectToGuiService()
 	self.__guiServiceConnection = rbxScriptSignal:Connect(function()
 		local selection = GuiService.SelectedObject
 
-		for id, ref in pairs(self.__children) do
+		for id, ref in pairs(self.childRefs) do
 			if ref.current == selection then
 				self.__lastSelected = id
 			end
@@ -47,19 +62,21 @@ function SelectionGroup:__connectToGuiService()
 	end)
 end
 
-function SelectionGroup:updateChildren(childRefs, default)
-	assert(typeof(childRefs) == "table", "Bad arg #1: must be a table of refs")
+function SelectionGroup:setDefault(defaultSelection)
+	assert(
+		typeof(defaultSelection) == nil or
+		typeof(defaultSelection) == "table",
+	"Bad arg #1: must be a table of refs")
 
-	-- Children are a mapping of ref object -> key
-	self.__children = childRefs
-	DEBUG_printChildren(self.__children)
+	self.__defaultSelection = defaultSelection
 end
 
-function SelectionGroup:getGroupSelectionCallback()
+function SelectionGroup:getGroupSelectedCallback()
 	return function()
-		if self.__lastSelected ~= nil then
+		if self.__persistSelection and self.__lastSelected ~= nil then
 			self:__selectChild(self.__lastSelected)
 		else
+			DEBUG_printChildren(self.childRefs)
 			self:__selectChild(self.__defaultSelection)
 		end
 	end
@@ -73,13 +90,16 @@ function SelectionGroup:destruct()
 	end
 end
 
-local function createSelectionGroup(defaultSelection, defaultId)
+local function createSelectionGroup(persistSelection)
 	local self = setmetatable({
-		__defaultSelection = defaultSelection,
-		-- Children are a mapping of ref object -> key
-		__children = {
-			[defaultSelection] = getId(defaultId),
-		},
+		childRefs = createRefCache(),
+
+		__persistSelection = persistSelection,
+
+		-- Uninitialized for now
+		__defaultSelection = nil,
+		__lastSelected = nil,
+		__guiServiceConnection = nil,
 	}, SelectionGroup)
 
 	self:__connectToGuiService()

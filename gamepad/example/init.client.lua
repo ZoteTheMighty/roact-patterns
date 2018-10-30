@@ -35,10 +35,8 @@ local bottomButtons = {
 local TabNavigation = Roact.Component:extend("TabNavigation")
 
 function TabNavigation:init()
-	self.topRef = Roact.createRef()
-	self.bottomRef = Roact.createRef()
-
-	self.group = Gamepad.createSelectionGroup(self.topRef)
+	self.group = Gamepad.createSelectionGroup(false)
+	self.group:setDefault(self.group.childRefs.top)
 end
 
 function TabNavigation:render()
@@ -47,7 +45,7 @@ function TabNavigation:render()
 		BackgroundColor3 = Color3.new(0.2, 0.2, 0.2),
 	}, {
 		Rooter = e(Rooter, {
-			rooted = self.group:getGroupSelectionCallback(),
+			rooted = self.group:getGroupSelectedCallback(),
 		}),
 		NavigationFrame = e("Frame", {
 			Size = UDim2.new(1, 0, 0, 60),
@@ -55,9 +53,10 @@ function TabNavigation:render()
 		}, {
 			NavButtons = e(ButtonList, {
 				buttons = topButtons,
+				persist = true,
 
-				[Roact.Ref] = self.topRef,
-				selectionDown = self.bottomRef,
+				[Roact.Ref] = self.group.childRefs.top,
+				selectionDown = self.group.childRefs.bottom,
 			}),
 		}),
 		BodyFrame = e("Frame", {
@@ -67,19 +66,17 @@ function TabNavigation:render()
 		}, {
 			BodyButtons = e(ButtonList, {
 				buttons = bottomButtons,
+				persist = false,
 
-				[Roact.Ref] = self.bottomRef,
-				selectionUp = self.topRef,
+				[Roact.Ref] = self.group.childRefs.bottom,
+				selectionUp = self.group.childRefs.top,
 			}),
 		})
 	})
 end
 
-function TabNavigation:didMount()
-	self.group:updateChildren({
-		[self.topRef] = "Top",
-		[self.bottomRef] = "Bottom",
-	})
+function TabNavigation:willUnmount()
+	self.group:destruct()
 end
 
 local function App(props)
