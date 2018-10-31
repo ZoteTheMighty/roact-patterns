@@ -7,6 +7,9 @@ local Gamepad = require(Modules.Gamepad)
 
 local SelectableButton = require(script.Parent.SelectableButton)
 
+local function noop()
+end
+
 local ButtonList = Roact.Component:extend("ButtonList")
 
 function ButtonList:init()
@@ -20,6 +23,7 @@ function ButtonList:render()
 	local buttons = self.props.buttons
 	local selectionUp = self.props.selectionUp
 	local selectionDown = self.props.selectionDown
+	local onButtonActivated = self.props.onButtonActivated or noop
 
 	local children = {}
 
@@ -47,6 +51,9 @@ function ButtonList:render()
 				NextSelectionRight = self.group.childRefs[nextSibling],
 
 				[Roact.Ref] = self.group.childRefs[index],
+				[Roact.Event.Activated] = function()
+					onButtonActivated(index)
+				end
 			},
 			selectedStyle = {
 				BackgroundColor3 = Color3.new(1, 0, 0),

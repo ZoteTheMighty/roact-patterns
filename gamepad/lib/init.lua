@@ -1,3 +1,3 @@
 return {
-	createSelectionGroup = require(script.createSelectionGroup)
+	createSelectionGroup = require(script.createSelectionGroup),
 }

@@ -35,18 +35,6 @@ SelectionGroup.__index = SelectionGroup
 -- * find way to support bumper/alternate nav
 -- * paradigm for hierarchical selection?
 
-function SelectionGroup:__selectChild(refOrId)
-	local childRef = refOrId
-
-	if typeof(refOrId) ~= "table" then
-		childRef = self.childRefs[refOrId]
-	end
-
-	if childRef ~= nil then
-		GuiService.SelectedObject = childRef.current
-	end
-end
-
 function SelectionGroup:__connectToGuiService()
 	-- Connecting to GuiService.SelectedObject lets us persist selections
 	local rbxScriptSignal = GuiService:GetPropertyChangedSignal("SelectedObject")
@@ -62,7 +50,32 @@ function SelectionGroup:__connectToGuiService()
 	end)
 end
 
+function SelectionGroup:selectChild(refOrId)
+	local childRef = refOrId
+
+	if typeof(refOrId) ~= "table" then
+		childRef = self.childRefs[refOrId]
+	end
+
+	if childRef ~= nil then
+		GuiService.SelectedObject = childRef.current
+	end
+end
+
 function SelectionGroup:setDefault(defaultSelection)
+	--[[
+		What if we did something like this instead?
+
+		function SelectionGroup:configure(config)
+
+		config.default -- ref; default selection
+		config.enter -- function; runs when calling group:enter()
+		config.exit -- function; mapped to back button when group:enter() is called
+
+		too simple? maybe instead it uses some concept of rules or contexts?
+		I feel like this is how context action service came to be...
+	]]
+
 	assert(
 		typeof(defaultSelection) == nil or
 		typeof(defaultSelection) == "table",
@@ -82,8 +95,8 @@ function SelectionGroup:getGroupSelectedCallback()
 	end
 end
 
+-- Any way we can avoid having to call this?
 function SelectionGroup:destruct()
-	-- Clean up change listener
 	if self.__guiServiceConnection ~= nil then
 		self.__guiServiceConnection:Disconnect()
 		self.__guiServiceConnection = nil

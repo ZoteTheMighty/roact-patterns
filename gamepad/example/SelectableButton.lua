@@ -22,9 +22,11 @@ end
 function SelectableButton:render()
 	local style = self.props.style
 	local selectedStyle = self.props.selectedStyle
+	local onSelectionGained = self.props.onSelectionGained
+	local onSelectionLost = self.props.onSelectionLost
 
 	local fullProps = {
-		Size = UDim2.new(0, 200, 1, 0),
+		Size = UDim2.new(0, 200, 0, 100),
 		BackgroundColor3 = Color3.new(0, 0, 0),
 		BorderSizePixel = 0,
 		TextColor3 = Color3.new(1, 1, 1),
@@ -43,12 +45,18 @@ function SelectableButton:render()
 		NextSelectionDown = self.ref,
 
 		[Roact.Event.SelectionGained] = function()
+			if onSelectionGained ~= nil then
+				onSelectionGained()
+			end
 			self:setState({
 				selected = true,
 			})
 		end,
 
 		[Roact.Event.SelectionLost] = function()
+			if onSelectionLost ~= nil then
+				onSelectionGained()
+			end
 			self:setState({
 				selected = false,
 			})
