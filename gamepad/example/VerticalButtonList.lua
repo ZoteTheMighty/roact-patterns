@@ -26,7 +26,6 @@ function ButtonList:render()
 
 	local onButtonActivated = self.props.onButtonActivated or noop
 	local onButtonSelected = self.props.onButtonSelected or noop
-	local onBackPressed = self.props.onBackPressed or noop
 
 	local children = {}
 

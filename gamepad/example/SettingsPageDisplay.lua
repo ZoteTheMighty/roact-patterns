@@ -34,6 +34,8 @@ local function SettingsPageGameplay(props)
 			buttons = options,
 			persist = true,
 
+			selectionLeft = props.navigation,
+
 			[Roact.Ref] = props[Roact.Ref]
 		})
 	})

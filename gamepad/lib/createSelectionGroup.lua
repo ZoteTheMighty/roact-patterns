@@ -87,10 +87,10 @@ end
 function SelectionGroup:getGroupSelectedCallback()
 	return function()
 		if self.__persistSelection and self.__lastSelected ~= nil then
-			self:__selectChild(self.__lastSelected)
+			self:selectChild(self.__lastSelected)
 		else
 			DEBUG_printChildren(self.childRefs)
-			self:__selectChild(self.__defaultSelection)
+			self:selectChild(self.__defaultSelection)
 		end
 	end
 end

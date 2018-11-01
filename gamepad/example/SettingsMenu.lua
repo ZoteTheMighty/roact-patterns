@@ -57,15 +57,17 @@ function SettingsMenu:render()
 				buttons = settingsCategories,
 				persist = true,
 
+				selectionRight = self.group.childRefs.page,
+
 				[Roact.Ref] = self.group.childRefs.categoryList,
 				onButtonSelected = function(index)
 					self:setState{
 						selectedIndex = index,
 					}
 				end,
-				onButtonActivated = function(index)
-					self.group:selectChild(self.group.childRefs.page)
-				end
+				-- onButtonActivated = function(index)
+				-- 	self.group:selectChild(self.group.childRefs.page)
+				-- end
 			}),
 		}),
 		PageContainer = e("Frame", {
@@ -74,6 +76,8 @@ function SettingsMenu:render()
 			BackgroundTransparency = 1,
 		}, {
 			Page = pageComponent ~= nil and e(pageComponent, {
+				navigation = self.group.childRefs.categoryList,
+
 				[Roact.Ref] = self.group.childRefs.page,
 			}),
 		})
