@@ -9,7 +9,7 @@ local VerticalButtonList = require(script.Parent.VerticalButtonList)
 local SettingsPageGameplay = require(script.Parent.SettingsPageGameplay)
 local SettingsPageDisplay = require(script.Parent.SettingsPageDisplay)
 local SettingsPageAudio = require(script.Parent.SettingsPageAudio)
-local Rooter = require(script.Parent.Rooter)
+local RootFrame = require(script.Parent.RootFrame)
 
 local e = Roact.createElement
 
@@ -31,8 +31,11 @@ local settingsCategories = {
 local SettingsMenu = Roact.Component:extend("SettingsMenu")
 
 function SettingsMenu:init()
-	self.group = Gamepad.createSelectionGroup(false)
-	self.group:setDefault(self.group.childRefs.categoryList)
+	self.navigationController = Gamepad.createNavigationController()
+	self._context["Navigation"] = self.navigationController
+
+	self.categoriesRef = Roact.createRef()
+	self.pageRef = Roact.createRef()
 
 	self.state = {
 		selectedIndex = 1,
@@ -40,34 +43,35 @@ function SettingsMenu:init()
 end
 
 function SettingsMenu:render()
+	local pageName = settingsCategories[self.state.selectedIndex].text
 	local pageComponent = settingsCategories[self.state.selectedIndex].page
 
-	return e("Frame", {
+	return e(RootFrame, {
 		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundColor3 = Color3.new(0.2, 0.2, 0.2),
+
+		rooted = function()
+			self.navigationController:navigateTo("Categories")
+		end,
 	}, {
-		Rooter = e(Rooter, {
-			rooted = self.group:getGroupSelectedCallback(),
-		}),
 		NavigationFrame = e("Frame", {
 			Size = UDim2.new(0, 200, 1, 0),
 			BackgroundColor3 = Color3.new(0.1, 0.1, 0.1),
 		}, {
 			NavButtons = e(VerticalButtonList, {
+				focusGroupId = "Categories",
+
 				buttons = settingsCategories,
-				persist = true,
 
-				selectionRight = self.group.childRefs.page,
-
-				[Roact.Ref] = self.group.childRefs.categoryList,
+				[Roact.Ref] = self.categoriesRef,
 				onButtonSelected = function(index)
 					self:setState{
 						selectedIndex = index,
 					}
 				end,
-				-- onButtonActivated = function(index)
-				-- 	self.group:selectChild(self.group.childRefs.page)
-				-- end
+				onButtonActivated = function(index)
+					self.navigationController:navigateTo("Page")
+				end
 			}),
 		}),
 		PageContainer = e("Frame", {
@@ -75,17 +79,13 @@ function SettingsMenu:render()
 			Position = UDim2.new(0, 200, 0, 0),
 			BackgroundTransparency = 1,
 		}, {
-			Page = pageComponent ~= nil and e(pageComponent, {
-				navigation = self.group.childRefs.categoryList,
+			[pageName] = pageComponent ~= nil and e(pageComponent, {
+				focusGroupId = "Page",
 
-				[Roact.Ref] = self.group.childRefs.page,
+				[Roact.Ref] = self.pageRef,
 			}),
 		})
 	})
-end
-
-function SettingsMenu:willUnmount()
-	self.group:destruct()
 end
 
 return SettingsMenu

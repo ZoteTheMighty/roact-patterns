@@ -4,28 +4,38 @@ local Modules = ReplicatedStorage.Modules
 
 local Roact = require(Modules.Roact)
 
-local Rooter = Roact.Component:extend("Rooter")
+local assign = require(script.Parent.assign)
 
-function Rooter:init()
+local RootFrame = Roact.Component:extend("RootFrame")
+
+function RootFrame:init()
 	self.isRooted = false
 end
 
-function Rooter:render()
-	return Roact.createElement("Folder", {
+function RootFrame:render()
+	local rooted = self.props.rooted
+	local unrooted = self.props.unrooted
+
+	local frameProps = {
 		[Roact.Event.AncestryChanged] = function(object)
 			if object:IsDescendantOf(game) then
 				if not self.isRooted then
 					self.isRooted = true
-					self.props.rooted()
+					rooted()
 				end
 			else
 				if self.isRooted then
 					self.isRooted = false
-					self.props.unrooted()
+					unrooted()
 				end
 			end
 		end,
-	})
+	}
+
+	return Roact.createElement("Frame", assign(frameProps, self.props, {
+		rooted = Roact.None,
+		unrooted = Roact.None,
+	}))
 end
 
-return Rooter
+return RootFrame

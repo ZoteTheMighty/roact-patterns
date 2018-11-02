@@ -15,4 +15,8 @@ local function App(props)
 	})
 end
 
+Roact.setGlobalConfig({
+	["elementTracing"] = true
+})
+
 Roact.mount(Roact.createElement(App), Players.LocalPlayer:WaitForChild("PlayerGui"), "Gamepad")

@@ -1,3 +1,9 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Modules = ReplicatedStorage.Modules
+
+local Roact = require(Modules.Roact)
+
 --[[
 	Equivalent to JavaScript's Object.assign, useful for merging together tables
 	without mutating them and without creating extra tables.
@@ -7,7 +13,11 @@ local function assign(target, ...)
 		local source = select(i, ...)
 
 		for key, value in pairs(source) do
-			target[key] = value
+			if value == Roact.None then
+				target[key] = nil
+			else
+				target[key] = value
+			end
 		end
 	end
 

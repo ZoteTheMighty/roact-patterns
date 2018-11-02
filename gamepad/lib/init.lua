@@ -1,3 +1,4 @@
 return {
-	createSelectionGroup = require(script.createSelectionGroup),
+	createNavigationController = require(script.NavigationController).create,
+	FocusGroup = require(script.FocusGroup),
 }

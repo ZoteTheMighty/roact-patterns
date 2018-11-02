@@ -7,16 +7,30 @@ local Gamepad = require(Modules.Gamepad)
 
 local SelectableButton = require(script.Parent.SelectableButton)
 
+-- This is a handy trick to allow us to reference refs before we've actually
+-- rendered anything, and without duplicating rendering logic!
+local function createRefCache()
+	local refCache = {}
+
+	setmetatable(refCache, {
+		__index = function(_, key)
+			local newRef = Roact.createRef()
+			refCache[key] = newRef
+
+			return newRef
+		end,
+	})
+
+	return refCache
+end
+
 local function noop()
 end
 
 local ButtonList = Roact.Component:extend("ButtonList")
 
 function ButtonList:init()
-	local persist = self.props.persist
-
-	self.group = Gamepad.createSelectionGroup(persist)
-	self.group:setDefault(self.group.childRefs[1])
+	self.childRefs = createRefCache()
 end
 
 function ButtonList:render()
@@ -27,6 +41,8 @@ function ButtonList:render()
 	local onButtonActivated = self.props.onButtonActivated or noop
 	local onButtonSelected = self.props.onButtonSelected or noop
 
+	local focusGroupId = self.props.focusGroupId
+
 	local children = {}
 
 	children.Layout = Roact.createElement("UIListLayout", {
@@ -35,12 +51,20 @@ function ButtonList:render()
 		HorizontalAlignment = Enum.HorizontalAlignment.Center,
 	})
 
+	children.FocusGroup = Roact.createElement(Gamepad.FocusGroup, {
+		id = focusGroupId,
+		focusRef = self.props[Roact.Ref],
+		defaultSelection = self.childRefs[1],
+	})
+
 	for index, button in ipairs(buttons) do
 		-- 1-based indexing makes math gross
 		local previousSibling = ((index - 2) % #buttons) + 1
 		local nextSibling = (index % #buttons) + 1
 
-		children[index] = Roact.createElement(SelectableButton, {
+		local buttonId = ("%s_%s"):format(index, button.text)
+
+		children[buttonId] = Roact.createElement(SelectableButton, {
 			selectionId = index,
 			onSelectionGained = function()
 				onButtonSelected(index)
@@ -53,10 +77,10 @@ function ButtonList:render()
 				NextSelectionRight = selectionRight,
 
 				-- Inverted from expectations, to help us confirm that its not just default selection logic
-				NextSelectionUp = self.group.childRefs[previousSibling],
-				NextSelectionDown = self.group.childRefs[nextSibling],
+				NextSelectionUp = self.childRefs[previousSibling],
+				NextSelectionDown = self.childRefs[nextSibling],
 
-				[Roact.Ref] = self.group.childRefs[index],
+				[Roact.Ref] = self.childRefs[index],
 				[Roact.Event.Activated] = function()
 					onButtonActivated(index)
 				end,
@@ -72,12 +96,7 @@ function ButtonList:render()
 		BackgroundTransparency = 1,
 
 		[Roact.Ref] = self.props[Roact.Ref],
-		[Roact.Event.SelectionGained] = self.group:getGroupSelectedCallback()
 	}, children)
-end
-
-function ButtonList:willUnmount()
-	self.group:destruct()
 end
 
 return ButtonList
