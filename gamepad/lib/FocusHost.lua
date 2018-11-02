@@ -10,7 +10,7 @@ FocusHost.__tostring = function(self)
 	end
 	navRulesString = navRulesString .. " }"
 
-	return ("FocusHost(id: %s, host: %s, default: %s, navRules: %s)"):format(
+	return ("FocusHost(host: %s, default: %s, navRules: %s)"):format(
 		self.id,
 		tostring(self.host),
 		tostring(self.default),

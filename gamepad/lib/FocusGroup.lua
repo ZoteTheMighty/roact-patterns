@@ -13,23 +13,21 @@ end
 function FocusGroup:didMount()
 	local id = self.props.id
 	local host = self.props.host
-	local onRegister = self.props.onRegister
+	local configureFocus = self.props.configureFocus
 
-	-- FIXME: SCARY CONTEXT
 	local nav = self._context["Navigation"]
 
-	local focusHost = nav:registerFocusHost(id, host)
+	local focusHost = nav:mountFocusHost(id, host)
 
-	onRegister(focusHost)
+	configureFocus(focusHost)
 end
 
 function FocusGroup:willUnmount()
 	local id = self.props.id
 
-	-- FIXME: SCARY CONTEXT
 	local nav = self._context["Navigation"]
 
-	nav:deregisterFocusHost(id)
+	nav:unmountFocusHost(id)
 end
 
 return FocusGroup

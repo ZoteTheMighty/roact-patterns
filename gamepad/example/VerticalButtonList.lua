@@ -55,7 +55,7 @@ function ButtonList:render()
 	children.FocusGroup = Roact.createElement(Gamepad.FocusGroup, {
 		id = focusGroupId,
 		host = self.props[Roact.Ref],
-		onRegister = function(focusHost)
+		configureFocus = function(focusHost)
 			focusHost:setDefault(self.childRefs[1])
 			focusHost:setNavRule("back", onBack, Enum.KeyCode.ButtonB)
 		end

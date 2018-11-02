@@ -11,25 +11,22 @@ function NavigationController.create()
 end
 
 -- TODO: Consider giving refs a unique id?
-function NavigationController:registerFocusHost(id, hostRef)
+function NavigationController:mountFocusHost(id, hostRef)
 	assert(self.__focusGroups[id] == nil, "Focus host already registered for " .. tostring(id))
 	assert(typeof(hostRef) == "table", "hostRef must be a valid ref")
 
-	-- TODO: Support selection tuple
+	-- TODO: Support selection tuple if possible
 	local newFocusHost = FocusHost.new(id, hostRef)
 	self.__focusGroups[id] = newFocusHost
-
-	print("registering ", tostring(newFocusHost))
 
 	return newFocusHost
 end
 
-function NavigationController:deregisterFocusHost(id)
-	-- TODO: Remove host by identity as well as id
+function NavigationController:unmountFocusHost(id)
+	-- TODO: Remove host by identity as well as id?
 	assert(self.__focusGroups[id] ~= nil, "No focus host registered for " .. tostring(id))
 
 	-- TODO: What if this group is currently focused?
-	print("deregistering ", tostring(self.__focusGroups[id]))
 
 	self.__focusGroups[id] = nil
 end
