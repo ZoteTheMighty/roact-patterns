@@ -25,9 +25,9 @@ local function SettingsPageGameplay(props)
 			-- TODO: Allow focus redirection so we can avoid this prop drilling
 			focusGroupId = props.focusGroupId,
 			buttons = options,
-			persist = true,
 
-			selectionLeft = props.navigation,
+			-- FIXME: drilling :/
+			onBack = props.onBack,
 
 			[Roact.Ref] = props[Roact.Ref]
 		})

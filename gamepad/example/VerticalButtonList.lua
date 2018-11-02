@@ -40,6 +40,7 @@ function ButtonList:render()
 
 	local onButtonActivated = self.props.onButtonActivated or noop
 	local onButtonSelected = self.props.onButtonSelected or noop
+	local onBack = self.props.onBack
 
 	local focusGroupId = self.props.focusGroupId
 
@@ -53,8 +54,11 @@ function ButtonList:render()
 
 	children.FocusGroup = Roact.createElement(Gamepad.FocusGroup, {
 		id = focusGroupId,
-		focusRef = self.props[Roact.Ref],
-		defaultSelection = self.childRefs[1],
+		host = self.props[Roact.Ref],
+		onRegister = function(focusHost)
+			focusHost:setDefault(self.childRefs[1])
+			focusHost:setNavRule("back", onBack, Enum.KeyCode.ButtonB)
+		end
 	})
 
 	for index, button in ipairs(buttons) do

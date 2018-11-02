@@ -81,6 +81,9 @@ function SettingsMenu:render()
 		}, {
 			[pageName] = pageComponent ~= nil and e(pageComponent, {
 				focusGroupId = "Page",
+				onBack = function()
+					self.navigationController:navigateTo("Categories")
+				end,
 
 				[Roact.Ref] = self.pageRef,
 			}),

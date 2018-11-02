@@ -1,37 +1,4 @@
-local GuiService = game:GetService("GuiService")
-
--- local Type = {
--- 	Ref = newproxy(false),
--- 	FocusOwner = newproxy(false),
--- }
-
--- function Type.of(object)
--- 	if object[Type.FocusOwner] then
--- 		return Type.FocusOwner
--- 	else
--- 		return Type.Ref
--- 	end
--- end
-
-local function printFocus(prefix, id, focusGroup)
-	if focusGroup == nil then
-		print(("%s %s"):format(prefix, id))
-	else
-		print(("%s %s - host: %s - default: %s"):format(
-			prefix, id, tostring(focusGroup.hostRef), tostring(focusGroup.defaultSelectionRef)
-		))
-	end
-end
-
-local function removeFocusFromRef(id, focusGroup)
-	-- TODO: Allow persisted instead of default
-	GuiService:RemoveSelectionGroup(id, focusGroup.hostRef.current)
-end
-
-local function focusSelectedRef(id, focusGroup)
-	GuiService:AddSelectionParent(id, focusGroup.hostRef.current)
-	GuiService.SelectedObject = focusGroup.defaultSelectionRef.current
-end
+local FocusHost = require(script.Parent.FocusHost)
 
 local NavigationController = {}
 NavigationController.__index = NavigationController
@@ -44,23 +11,25 @@ function NavigationController.create()
 end
 
 -- TODO: Consider giving refs a unique id?
-function NavigationController:registerFocusGroup(id, hostRef, defaultSelectionRef)
-	assert(self.__focusGroups[id] == nil, "Focus listener already registered for " .. tostring(id))
+function NavigationController:registerFocusHost(id, hostRef)
+	assert(self.__focusGroups[id] == nil, "Focus host already registered for " .. tostring(id))
+	assert(typeof(hostRef) == "table", "hostRef must be a valid ref")
 
 	-- TODO: Support selection tuple
-	self.__focusGroups[id] = {
-		hostRef = hostRef,
-		defaultSelectionRef = defaultSelectionRef,
-	}
+	local newFocusHost = FocusHost.new(id, hostRef)
+	self.__focusGroups[id] = newFocusHost
 
-	printFocus("registered group", id, self.__focusGroups[id])
+	print("registering ", tostring(newFocusHost))
+
+	return newFocusHost
 end
 
-function NavigationController:deregisterFocusGroup(id)
-	assert(self.__focusGroups[id] ~= nil, "No focus listener registered for " .. tostring(id))
+function NavigationController:deregisterFocusHost(id)
+	-- TODO: Remove host by identity as well as id
+	assert(self.__focusGroups[id] ~= nil, "No focus host registered for " .. tostring(id))
 
 	-- TODO: What if this group is currently focused?
-	printFocus("deregistering group", id, self.__focusGroups[id])
+	print("deregistering ", tostring(self.__focusGroups[id]))
 
 	self.__focusGroups[id] = nil
 end
@@ -69,17 +38,16 @@ function NavigationController:navigateTo(newFocusId)
 	-- Remove focus from previous group
 	if self.__currentFocusId ~= nil then
 		local oldFocusId = self.__currentFocusId
-		local oldFocus = self.__focusGroups[oldFocusId]
+		local oldFocusHost = self.__focusGroups[oldFocusId]
 
-		removeFocusFromRef(self.__currentFocusId, oldFocus)
+		oldFocusHost:removeFocus()
 	end
 
 	-- Setup focus for new selection
 	self.__currentFocusId = newFocusId
 
-	local newFocus = self.__focusGroups[newFocusId]
-	printFocus("navigate to", newFocusId, newFocus)
-	focusSelectedRef(newFocusId, newFocus)
+	local newFocusHost = self.__focusGroups[newFocusId]
+	newFocusHost:giveFocus()
 end
 
 return NavigationController
