@@ -1,4 +1,5 @@
 local GuiService = game:GetService("GuiService")
+local HttpService = game:GetService("HttpService")
 local ContextActionService = game:GetService("ContextActionService")
 
 local FocusHost = {}
@@ -10,7 +11,7 @@ FocusHost.__tostring = function(self)
 	end
 	navRulesString = navRulesString .. " }"
 
-	return ("FocusHost(host: %s, default: %s, navRules: %s)"):format(
+	return ("FocusHost(\n\tid: %s,\n\thost: %s,\n\tdefault: %s,\n\tnavRules: %s\n)"):format(
 		self.id,
 		tostring(self.host),
 		tostring(self.default),
@@ -18,9 +19,9 @@ FocusHost.__tostring = function(self)
 	)
 end
 
-function FocusHost.new(id, host)
+function FocusHost.new(host)
 	return setmetatable({
-		id = id,
+		id = HttpService:GenerateGUID(false),
 		host = host,
 
 		defaultSelection = nil,

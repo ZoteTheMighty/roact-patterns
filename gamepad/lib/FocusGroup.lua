@@ -11,23 +11,22 @@ function FocusGroup:render()
 end
 
 function FocusGroup:didMount()
-	local id = self.props.id
 	local host = self.props.host
 	local configureFocus = self.props.configureFocus
 
 	local nav = self._context["Navigation"]
 
-	local focusHost = nav:mountFocusHost(id, host)
+	local focusHost = nav:mountFocusHost(host)
 
 	configureFocus(focusHost)
 end
 
 function FocusGroup:willUnmount()
-	local id = self.props.id
+	local host = self.props.host
 
 	local nav = self._context["Navigation"]
 
-	nav:unmountFocusHost(id)
+	nav:unmountFocusHost(host)
 end
 
 return FocusGroup

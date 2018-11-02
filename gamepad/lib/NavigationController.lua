@@ -5,45 +5,50 @@ NavigationController.__index = NavigationController
 
 function NavigationController.create()
 	return setmetatable({
-		__currentFocusId = nil,
-		__focusGroups = {},
+		__currentFocus = nil,
+		__focusHosts = {},
 	}, NavigationController)
 end
 
 -- TODO: Consider giving refs a unique id?
-function NavigationController:mountFocusHost(id, hostRef)
-	assert(self.__focusGroups[id] == nil, "Focus host already registered for " .. tostring(id))
-	assert(typeof(hostRef) == "table", "hostRef must be a valid ref")
+function NavigationController:mountFocusHost(hostRef)
+	assert(self.__focusHosts[hostRef] == nil, "Focus host already registered for " .. tostring(hostRef))
+	assert(typeof(hostRef) == "table", "hostRef must be a ref, but was type " .. typeof(hostRef))
 
 	-- TODO: Support selection tuple if possible
-	local newFocusHost = FocusHost.new(id, hostRef)
-	self.__focusGroups[id] = newFocusHost
+	local newFocusHost = FocusHost.new(hostRef)
+	self.__focusHosts[hostRef] = newFocusHost
 
 	return newFocusHost
 end
 
-function NavigationController:unmountFocusHost(id)
-	-- TODO: Remove host by identity as well as id?
-	assert(self.__focusGroups[id] ~= nil, "No focus host registered for " .. tostring(id))
+function NavigationController:unmountFocusHost(hostRef)
+	assert(self.__focusHosts[hostRef] ~= nil, "No focus host registered for " .. tostring(hostRef))
 
 	-- TODO: What if this group is currently focused?
 
-	self.__focusGroups[id] = nil
+	self.__focusHosts[hostRef] = nil
 end
 
-function NavigationController:navigateTo(newFocusId)
+function NavigationController:navigateTo(newFocusRef)
+	if self.__focusHosts[newFocusRef] == nil then
+		-- TODO: Is it safe to error here? Or is a warning actually okay?
+		warn("No focus host registered for " .. tostring(newFocusRef))
+
+		return
+	end
+
 	-- Remove focus from previous group
-	if self.__currentFocusId ~= nil then
-		local oldFocusId = self.__currentFocusId
-		local oldFocusHost = self.__focusGroups[oldFocusId]
+	if self.__currentFocus ~= nil then
+		local oldFocusHost = self.__focusHosts[self.__currentFocus]
 
 		oldFocusHost:removeFocus()
 	end
 
 	-- Setup focus for new selection
-	self.__currentFocusId = newFocusId
+	self.__currentFocus = newFocusRef
 
-	local newFocusHost = self.__focusGroups[newFocusId]
+	local newFocusHost = self.__focusHosts[newFocusRef]
 	newFocusHost:giveFocus()
 end
 

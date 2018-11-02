@@ -51,7 +51,7 @@ function SettingsMenu:render()
 		BackgroundColor3 = Color3.new(0.2, 0.2, 0.2),
 
 		rooted = function()
-			self.navigationController:navigateTo("Categories")
+			self.navigationController:navigateTo(self.categoriesRef)
 		end,
 	}, {
 		NavigationFrame = e("Frame", {
@@ -59,8 +59,6 @@ function SettingsMenu:render()
 			BackgroundColor3 = Color3.new(0.1, 0.1, 0.1),
 		}, {
 			NavButtons = e(VerticalButtonList, {
-				focusGroupId = "Categories",
-
 				buttons = settingsCategories,
 
 				[Roact.Ref] = self.categoriesRef,
@@ -70,7 +68,7 @@ function SettingsMenu:render()
 					}
 				end,
 				onButtonActivated = function(index)
-					self.navigationController:navigateTo("Page")
+					self.navigationController:navigateTo(self.pageRef)
 				end
 			}),
 		}),
@@ -80,9 +78,8 @@ function SettingsMenu:render()
 			BackgroundTransparency = 1,
 		}, {
 			[pageName] = pageComponent ~= nil and e(pageComponent, {
-				focusGroupId = "Page",
 				onBack = function()
-					self.navigationController:navigateTo("Categories")
+					self.navigationController:navigateTo(self.categoriesRef)
 				end,
 
 				[Roact.Ref] = self.pageRef,

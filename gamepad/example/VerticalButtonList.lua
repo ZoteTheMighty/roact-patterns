@@ -42,8 +42,6 @@ function ButtonList:render()
 	local onButtonSelected = self.props.onButtonSelected or noop
 	local onBack = self.props.onBack
 
-	local focusGroupId = self.props.focusGroupId
-
 	local children = {}
 
 	children.Layout = Roact.createElement("UIListLayout", {
@@ -53,7 +51,6 @@ function ButtonList:render()
 	})
 
 	children.FocusGroup = Roact.createElement(Gamepad.FocusGroup, {
-		id = focusGroupId,
 		host = self.props[Roact.Ref],
 		configureFocus = function(focusHost)
 			focusHost:setDefault(self.childRefs[1])

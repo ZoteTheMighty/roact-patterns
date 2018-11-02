@@ -22,8 +22,6 @@ local function SettingsPageGameplay(props)
 		BackgroundColor3 = Color3.new(0.1, 0.2, 0.1),
 	}, {
 		Buttons = e(VerticalButtonList, {
-			-- TODO: Allow focus redirection so we can avoid this prop drilling
-			focusGroupId = props.focusGroupId,
 			buttons = options,
 
 			-- FIXME: drilling :/
