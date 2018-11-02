@@ -55,6 +55,7 @@ function ButtonList:render()
 		configureFocus = function(focusHost)
 			focusHost:setDefault(self.childRefs[1])
 			focusHost:setNavRule("back", onBack, Enum.KeyCode.ButtonB)
+			focusHost:setPersist(true)
 		end
 	})
 
@@ -77,7 +78,6 @@ function ButtonList:render()
 				NextSelectionLeft = selectionLeft,
 				NextSelectionRight = selectionRight,
 
-				-- Inverted from expectations, to help us confirm that its not just default selection logic
 				NextSelectionUp = self.childRefs[previousSibling],
 				NextSelectionDown = self.childRefs[nextSibling],
 

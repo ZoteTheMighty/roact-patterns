@@ -10,10 +10,9 @@ function NavigationController.create()
 	}, NavigationController)
 end
 
--- TODO: Consider giving refs a unique id?
 function NavigationController:mountFocusHost(hostRef)
 	assert(self.__focusHosts[hostRef] == nil, "Focus host already registered for " .. tostring(hostRef))
-	assert(typeof(hostRef) == "table", "hostRef must be a ref, but was type " .. typeof(hostRef))
+	assert(typeof(hostRef) == "table", "hostRef must be a ref")
 
 	-- TODO: Support selection tuple if possible
 	local newFocusHost = FocusHost.new(hostRef)
@@ -25,7 +24,12 @@ end
 function NavigationController:unmountFocusHost(hostRef)
 	assert(self.__focusHosts[hostRef] ~= nil, "No focus host registered for " .. tostring(hostRef))
 
-	-- TODO: What if this group is currently focused?
+	if self.__currentFocus == hostRef then
+		-- TODO: Is there a more graceful way to handle unmounting the thing with focus?
+		-- It may be correct behavior after all
+		warn("Unmounting focused group")
+		self.__focusHosts[self.__currentFocus]:removeFocus()
+	end
 
 	self.__focusHosts[hostRef] = nil
 end
