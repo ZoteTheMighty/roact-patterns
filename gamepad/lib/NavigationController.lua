@@ -27,8 +27,8 @@ function NavigationController:unmountFocusHost(hostRef)
 	if self.__currentFocus == hostRef then
 		-- TODO: Is there a more graceful way to handle unmounting the thing with focus?
 		-- It may be correct behavior after all
-		warn("Unmounting focused group")
-		self.__focusHosts[self.__currentFocus]:removeFocus()
+		warn("Unmounting currently-focused group")
+		FocusHost.removeFocus(self.__focusHosts[self.__currentFocus])
 	end
 
 	self.__focusHosts[hostRef] = nil
@@ -46,14 +46,14 @@ function NavigationController:navigateTo(newFocusRef)
 	if self.__currentFocus ~= nil then
 		local oldFocusHost = self.__focusHosts[self.__currentFocus]
 
-		oldFocusHost:removeFocus()
+		FocusHost.removeFocus(oldFocusHost)
 	end
 
 	-- Setup focus for new selection
 	self.__currentFocus = newFocusRef
 
 	local newFocusHost = self.__focusHosts[newFocusRef]
-	newFocusHost:giveFocus()
+	FocusHost.giveFocus(newFocusHost)
 end
 
 return NavigationController

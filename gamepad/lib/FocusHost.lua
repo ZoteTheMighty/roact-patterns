@@ -2,6 +2,8 @@ local GuiService = game:GetService("GuiService")
 local HttpService = game:GetService("HttpService")
 local ContextActionService = game:GetService("ContextActionService")
 
+local Symbol = require(script.Parent.Symbol)
+
 --[[
 	Features to implement:
 	* support multi-focus for nav rules
@@ -14,6 +16,9 @@ local ContextActionService = game:GetService("ContextActionService")
 	* hide give/remove focus from users (probably as static functions)
 ]]
 
+-- Used to access a set of fields that are internal to FocusHost
+local InternalData = Symbol.named("InternalData")
+
 local function isPersistedSelectionValid(instance)
 	if typeof(instance) ~= "Instance" then
 		return false
@@ -22,44 +27,38 @@ local function isPersistedSelectionValid(instance)
 	return instance:IsDescendantOf(game)
 end
 
-local FocusHost = {}
-FocusHost.__index = FocusHost
-FocusHost.__tostring = function(self)
+local FocusHostPrototype = {}
+FocusHostPrototype.__index = FocusHostPrototype
+FocusHostPrototype.__tostring = function(self)
+	local internalData = self[InternalData]
+
 	local navRulesString = "{ "
-	for navRuleId, _ in pairs(self.navRules) do
+	for navRuleId, _ in pairs(internalData.navRules) do
 		navRulesString = navRulesString .. tostring(navRuleId) .. ", "
 	end
 	navRulesString = navRulesString .. " }"
 
-	local onFocus = self.persists and self.persistedSelection or self.defaultSelection
+	local onFocus = internalData.persists and internalData.persistedSelection or internalData.defaultSelection
 
 	return ("FocusHost(\n\tid: %s,\n\thost: %s,\n\tonFocus: %s,\n\tnavRules: %s\n)"):format(
-		self.id,
-		tostring(self.host),
+		internalData.id,
+		tostring(internalData.host),
 		tostring(onFocus),
 		navRulesString
 	)
 end
 
-function FocusHost.new(host)
-	return setmetatable({
-		id = HttpService:GenerateGUID(false),
-		host = host,
-
-		persist = false,
-		defaultSelection = nil,
-		persistedSelection = nil,
-		navRules = {},
-	}, FocusHost)
-end
-
 -- TODO: Support builder pattern interface with these?
-function FocusHost:setDefault(default)
-	self.defaultSelection = default
+function FocusHostPrototype:setDefault(default)
+	self[InternalData].defaultSelection = default
+
+	return self
 end
 
-function FocusHost:setPersist(persist)
-	self.persist = persist
+function FocusHostPrototype:setPersist(persist)
+	self[InternalData].persist = persist
+
+	return self
 end
 
 --[[
@@ -67,10 +66,11 @@ end
 
 	Actions are bound and unbound as the focusHost gains and loses focus
 ]]
-function FocusHost:setNavRule(id, callback, ...)
+function FocusHostPrototype:setNavRule(id, callback, ...)
+	-- TODO: Should we even support this?
 	if callback == nil then
 		-- clear the rule
-		self.navRules[id] = nil
+		self[InternalData].navRules[id] = nil
 
 		return
 	end
@@ -85,36 +85,58 @@ function FocusHost:setNavRule(id, callback, ...)
 		ContextActionService:UnbindAction(id)
 	end
 
-	self.navRules[id] = {
+	self[InternalData].navRules[id] = {
 		bind = bind,
 		unbind = unbind,
 	}
+
+	return self
 end
 
-function FocusHost:removeFocus()
+local FocusHost = {}
+
+function FocusHost.new(host)
+	return setmetatable({
+		[InternalData] = {
+			id = HttpService:GenerateGUID(false),
+			host = host,
+
+			persist = false,
+			defaultSelection = nil,
+			persistedSelection = nil,
+			navRules = {},
+		}
+	}, FocusHostPrototype)
+end
+
+function FocusHost.removeFocus(focusHost)
+	local internalData = focusHost[InternalData]
+
 	-- Persistence has no choice but to operate on actual Instances,
 	-- since we don't really have a way to roll it back into a ref
-	if self.persist then
-		self.persistedSelection = GuiService.SelectedObject
+	if internalData.persist then
+		internalData.persistedSelection = GuiService.SelectedObject
 	end
 
-	GuiService:RemoveSelectionGroup(self.id, self.host.current)
+	GuiService:RemoveSelectionGroup(internalData.id, internalData.host.current)
 
-	for _, navRule in pairs(self.navRules) do
+	for _, navRule in pairs(internalData.navRules) do
 		navRule.unbind()
 	end
 end
 
-function FocusHost:giveFocus()
-	GuiService:AddSelectionParent(self.id, self.host.current)
-	if self.persist and isPersistedSelectionValid(self.persistedSelection) then
-		GuiService.SelectedObject = self.persistedSelection
+function FocusHost.giveFocus(focusHost)
+	local internalData = focusHost[InternalData]
+
+	GuiService:AddSelectionParent(internalData.id, internalData.host.current)
+	if internalData.persist and isPersistedSelectionValid(internalData.persistedSelection) then
+		GuiService.SelectedObject = internalData.persistedSelection
 	else
-		GuiService.SelectedObject = self.defaultSelection.current
+		GuiService.SelectedObject = internalData.defaultSelection.current
 	end
 
 
-	for _, navRule in pairs(self.navRules) do
+	for _, navRule in pairs(internalData.navRules) do
 		navRule.bind()
 	end
 end
