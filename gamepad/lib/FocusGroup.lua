@@ -16,9 +16,7 @@ function FocusGroup:didMount()
 
 	local nav = self._context["Navigation"]
 
-	local focusHost = nav:mountFocusHost(host)
-
-	configureFocus(focusHost)
+	configureFocus(nav:mountFocusHost(host))
 end
 
 function FocusGroup:willUnmount()

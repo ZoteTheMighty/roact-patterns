@@ -6,19 +6,26 @@ local Symbol = require(script.Parent.Symbol)
 
 --[[
 	Features to implement:
-	* support multi-focus for nav rules
+	* support multiple sets of nav rules
 		* in other words, allow a parent to have special navigation rules active
 			even when child group has focus
-	* support focus redirection to avoid prop drilling
+		* there are a number of ways to go about this. Maybe add method to inherit
+			parent nav rules?
+	* Support selection tuple in addition to selection parent
+	* Focus redirection, or allow FocusHosts with other FocusHosts as children
 
-	Interface TODOs:
-	* hide private members
-	* hide give/remove focus from users (probably as static functions)
+	Misc TODO:
+	* Reconsider the naming of various pieces of this component
 ]]
 
 -- Used to access a set of fields that are internal to FocusHost
 local InternalData = Symbol.named("InternalData")
 
+--[[
+	Selection persistence is in terms of actual Instances,
+	because there's not really a way to find an associated
+	ref object for an instance when saving persisted selection
+]]
 local function isPersistedSelectionValid(instance)
 	if typeof(instance) ~= "Instance" then
 		return false
@@ -48,7 +55,6 @@ FocusHostPrototype.__tostring = function(self)
 	)
 end
 
--- TODO: Support builder pattern interface with these?
 function FocusHostPrototype:setDefault(default)
 	self[InternalData].defaultSelection = default
 
@@ -67,7 +73,6 @@ end
 	Actions are bound and unbound as the focusHost gains and loses focus
 ]]
 function FocusHostPrototype:setNavRule(id, callback, ...)
-	-- TODO: Should we even support this?
 	if callback == nil then
 		-- clear the rule
 		self[InternalData].navRules[id] = nil
@@ -95,14 +100,17 @@ end
 
 local FocusHost = {}
 
-function FocusHost.new(host)
+-- TODO: Should we let this be created by the user and passed to the navigation controller?
+function FocusHost.create(host)
+	assert(typeof(host) == "table", "Bad arg #1: host must be a Roact ref")
+
 	return setmetatable({
 		[InternalData] = {
 			id = HttpService:GenerateGUID(false),
 			host = host,
 
-			persist = false,
 			defaultSelection = nil,
+			persist = false,
 			persistedSelection = nil,
 			navRules = {},
 		}
@@ -112,8 +120,6 @@ end
 function FocusHost.removeFocus(focusHost)
 	local internalData = focusHost[InternalData]
 
-	-- Persistence has no choice but to operate on actual Instances,
-	-- since we don't really have a way to roll it back into a ref
 	if internalData.persist then
 		internalData.persistedSelection = GuiService.SelectedObject
 	end
@@ -129,12 +135,12 @@ function FocusHost.giveFocus(focusHost)
 	local internalData = focusHost[InternalData]
 
 	GuiService:AddSelectionParent(internalData.id, internalData.host.current)
+
 	if internalData.persist and isPersistedSelectionValid(internalData.persistedSelection) then
 		GuiService.SelectedObject = internalData.persistedSelection
 	else
 		GuiService.SelectedObject = internalData.defaultSelection.current
 	end
-
 
 	for _, navRule in pairs(internalData.navRules) do
 		navRule.bind()

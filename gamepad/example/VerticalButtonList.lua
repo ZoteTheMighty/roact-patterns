@@ -54,8 +54,8 @@ function ButtonList:render()
 		host = self.props[Roact.Ref],
 		configureFocus = function(focusHost)
 			focusHost:setDefault(self.childRefs[1])
-			focusHost:setNavRule("back", onBack, Enum.KeyCode.ButtonB, Enum.KeyCode.DPadLeft)
-			focusHost:setPersist(true)
+				:setPersist(true)
+				:setNavRule("back", onBack, Enum.KeyCode.ButtonB)
 		end
 	})
 
