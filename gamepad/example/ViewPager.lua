@@ -5,34 +5,9 @@ local Modules = ReplicatedStorage.Modules
 local Roact = require(Modules.Roact)
 local Gamepad = require(Modules.Gamepad)
 
-local SettingsPageAudio = require(script.Parent.SettingsPageAudio)
-local SettingsPageDisplay = require(script.Parent.SettingsPageDisplay)
-local SettingsPageGameplay = require(script.Parent.SettingsPageGameplay)
-
 local SelectableButton = require(script.Parent.SelectableButton)
 
 local e = Roact.createElement
-
-local SAMPLE_PAGE_DATA = {
-	{
-		title = "Audio",
-		render = function(index, visible)
-			return visible and e(SettingsPageAudio)
-		end,
-	},
-	{
-		title = "Video",
-		render = function(index, visible)
-			return visible and e(SettingsPageDisplay)
-		end,
-	},
-	{
-		title = "Gameplay",
-		render = function(index, visible)
-			return visible and e(SettingsPageGameplay)
-		end,
-	},
-}
 
 local ViewPager = Roact.Component:extend("")
 
@@ -46,12 +21,13 @@ function ViewPager:init()
 		currentIndex = 1,
 	})
 
-	local pages = self.props.pages or SAMPLE_PAGE_DATA
+	local pages = self.props.pages
 	self.tabLeftNavRule = function()
 		local target = (self.state.currentIndex - 1 < 1) and #pages or self.state.currentIndex - 1
 		self:setState({
 			currentIndex = target
 		})
+		self.navController:navigateTo(self.pageRef)
 	end
 
 	self.tabRightNavRule = function()
@@ -59,11 +35,13 @@ function ViewPager:init()
 		self:setState({
 			currentIndex = target
 		})
+		self.navController:navigateTo(self.pageRef)
 	end
 end
 
 function ViewPager:render()
-	local pages = self.props.pages or SAMPLE_PAGE_DATA
+	local pages = self.props.pages
+	local renderPage = self.props.renderPage
 
 	local currentIndex = self.state.currentIndex
 
@@ -76,21 +54,23 @@ function ViewPager:render()
 			end,
 		}),
 		["$Layout"] = e("UIListLayout", {
-			FillDirection = Enum.FillDirection.Vertical,
+			FillDirection = Enum.FillDirection.Horizontal,
 			SortOrder = Enum.SortOrder.LayoutOrder,
 		}),
 	}
 
 	local pageChildren = {
-		["$FocusGroup"] = e(Gamepad.FocusGroup, {
-			host = self.pageRef,
-			configureFocus = function(focusHost)
-				print("Configure page")
-			end,
-		})
+		-- ["$FocusGroup"] = e(Gamepad.FocusGroup, {
+		-- 	host = self.pageRef,
+		-- 	configureFocus = function(focusHost)
+		-- 		focusHost:setNavRule("tabLeft", self.tabLeftNavRule, Enum.KeyCode.ButtonL1)
+		-- 		focusHost:setNavRule("tabRight", self.tabRightNavRule, Enum.KeyCode.ButtonR1)
+		-- 	end,
+		-- })
 	}
 
 	for index, page in ipairs(pages) do
+		local backgroundColor = currentIndex == index and Color3.new(1, 0, 0) or Color3.new(0, 0, 0)
 		navChildren[index] = e(SelectableButton, {
 			onSelectionGained = function()
 				self:setState({
@@ -98,18 +78,18 @@ function ViewPager:render()
 				})
 			end,
 			style = {
-				Text = page.title,
+				Text = page, -- TODO: need more than just string, probably
 				LayoutOrder = index,
+				BackgroundColor3 = backgroundColor,
 				[Roact.Event.Activated] = function()
 					self.navController:navigateTo(self.pageRef)
 				end
 			},
-			selectedStyle = {
-				BackgroundColor3 = Color3.new(1, 0, 0),
-			},
 		})
 
-		pageChildren[index] = page.render(index, index == currentIndex, self.pageRef)
+		if index == currentIndex then
+			pageChildren.CurrentPage = renderPage(page, self.pageRef)
+		end
 	end
 
 	return e("Frame", {
@@ -123,11 +103,9 @@ function ViewPager:render()
 			[Roact.Ref] = self.navRef,
 		}, navChildren),
 		PageContainer = e("Frame", {
-			Size = UDim2.new(1, -200, 1, 0),
-			Position = UDim2.new(0, 200, 0, 0),
+			Size = UDim2.new(1, 0, 1, -100),
+			Position = UDim2.new(0, 0, 0, 100),
 			BackgroundTransparency = 1,
-
-			[Roact.Ref] = self.pageRef,
 		}, pageChildren)
 	})
 end

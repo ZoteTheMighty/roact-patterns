@@ -87,12 +87,13 @@ function FocusHostPrototype:setNavRule(id, callback, ...)
 		-- clear the rule
 		self[InternalData].navRules[id] = nil
 
-		return
+		return self
 	end
 
 	local buttons = {...}
 
 	local function bind()
+		-- TODO: We may need to abstract this so that RobloxScripts can use 'BindCoreAction'
 		ContextActionService:BindAction(id, callback, false, unpack(buttons))
 	end
 

@@ -7,6 +7,9 @@ local Gamepad = require(Modules.Gamepad)
 
 local RootFrame = require(script.Parent.RootFrame)
 local ViewPager = require(script.Parent.ViewPager)
+local SettingsPageAudio = require(script.Parent.SettingsPageAudio)
+local SettingsPageDisplay = require(script.Parent.SettingsPageDisplay)
+local SettingsPageGameplay = require(script.Parent.SettingsPageGameplay)
 
 local e = Roact.createElement
 
@@ -30,6 +33,27 @@ function SettingsMenu:render()
 		end,
 	}, {
 		ViewPager = e(ViewPager, {
+			pages = {
+				"Audio",
+				"Video",
+				"Gameplay",
+			},
+			renderPage = function(id, forwardRef)
+				local component
+				if id == "Audio" then
+					component = SettingsPageAudio
+				elseif id == "Video" then
+					component = SettingsPageDisplay
+				elseif id == "Gameplay" then
+					component = SettingsPageGameplay
+				else
+					error("aw dang")
+				end
+
+				return e(component, {
+					[Roact.Ref] = forwardRef,
+				})
+			end,
 			[Roact.Ref] = self.navRef,
 		})
 	})

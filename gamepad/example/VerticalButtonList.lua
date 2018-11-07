@@ -44,22 +44,21 @@ function ButtonList:render()
 	local onButtonSelected = self.props.onButtonSelected or noop
 	local onBack = self.props.onBack
 
-	local children = {}
-
-	children.Layout = Roact.createElement("UIListLayout", {
-		SortOrder = Enum.SortOrder.LayoutOrder,
-		FillDirection = Enum.FillDirection.Vertical,
-		HorizontalAlignment = Enum.HorizontalAlignment.Center,
-	})
-
-	children.FocusGroup = Roact.createElement(Gamepad.FocusGroup, {
-		host = self.ref,
-		configureFocus = function(focusHost)
-			focusHost:setDefault(self.childRefs[1])
-				:setPersist(true)
-				:setNavRule("back", onBack, Enum.KeyCode.ButtonB)
-		end
-	})
+	local children = {
+		["$Layout"] = Roact.createElement("UIListLayout", {
+			SortOrder = Enum.SortOrder.LayoutOrder,
+			FillDirection = Enum.FillDirection.Vertical,
+			HorizontalAlignment = Enum.HorizontalAlignment.Center,
+		}),
+		["$FocusGroup"] = Roact.createElement(Gamepad.FocusGroup, {
+			host = self.ref,
+			configureFocus = function(focusHost)
+				focusHost:setDefault(self.childRefs[1])
+					:setPersist(true)
+					:setNavRule("back", onBack, Enum.KeyCode.ButtonB)
+			end
+		}),
+	}
 
 	for index, button in ipairs(buttons) do
 		-- 1-based indexing makes math gross
@@ -76,7 +75,7 @@ function ButtonList:render()
 			style = {
 				Text = button.text,
 				LayoutOrder = index,
-				-- If either of these are nil, SelectableButton will make them loop back
+
 				NextSelectionLeft = selectionLeft,
 				NextSelectionRight = selectionRight,
 
