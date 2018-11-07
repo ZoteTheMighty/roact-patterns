@@ -127,7 +127,7 @@ function ViewPager:render()
 			Position = UDim2.new(0, 200, 0, 0),
 			BackgroundTransparency = 1,
 
-			-- [Roact.Ref] = self.pageRef,
+			[Roact.Ref] = self.pageRef,
 		}, pageChildren)
 	})
 end
