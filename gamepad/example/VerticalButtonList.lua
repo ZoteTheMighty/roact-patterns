@@ -30,6 +30,8 @@ end
 local ButtonList = Roact.Component:extend("ButtonList")
 
 function ButtonList:init()
+	self.ref = self.props[Roact.Ref] or Roact.createRef()
+
 	self.childRefs = createRefCache()
 end
 
@@ -51,7 +53,7 @@ function ButtonList:render()
 	})
 
 	children.FocusGroup = Roact.createElement(Gamepad.FocusGroup, {
-		host = self.props[Roact.Ref],
+		host = self.ref,
 		configureFocus = function(focusHost)
 			focusHost:setDefault(self.childRefs[1])
 				:setPersist(true)
@@ -96,7 +98,7 @@ function ButtonList:render()
 		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundTransparency = 1,
 
-		[Roact.Ref] = self.props[Roact.Ref],
+		[Roact.Ref] = self.ref,
 	}, children)
 end
 

@@ -34,6 +34,16 @@ local function isPersistedSelectionValid(instance)
 	return instance:IsDescendantOf(game)
 end
 
+local function findDefaultSelection(host)
+	if host.current ~= nil then
+		for _, object in ipairs(host.current:GetChildren()) do
+			if object:IsA("GuiObject") then
+				return object
+			end
+		end
+	end
+end
+
 local FocusHostPrototype = {}
 FocusHostPrototype.__index = FocusHostPrototype
 FocusHostPrototype.__tostring = function(self)
@@ -138,8 +148,16 @@ function FocusHost.giveFocus(focusHost)
 
 	if internalData.persist and isPersistedSelectionValid(internalData.persistedSelection) then
 		GuiService.SelectedObject = internalData.persistedSelection
-	else
+	elseif internalData.defaultSelection ~= nil then
 		GuiService.SelectedObject = internalData.defaultSelection.current
+	else
+		local default = findDefaultSelection(internalData.host)
+		if default ~= nil then
+			warn("Using sub-optimal default selection logic")
+			GuiService.SelectedObject = default
+		else
+			warn("No default selection exists, and none could be found")
+		end
 	end
 
 	for _, navRule in pairs(internalData.navRules) do

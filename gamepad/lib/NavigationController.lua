@@ -12,7 +12,7 @@ end
 
 function NavigationController:mountFocusHost(hostRef)
 	assert(self.__focusHosts[hostRef] == nil, "Focus host already registered for " .. tostring(hostRef))
-	assert(typeof(hostRef) == "table", "hostRef must be a ref")
+	assert(typeof(hostRef) == "table", "hostRef must be a ref but was " .. typeof(hostRef))
 
 	-- TODO: Support selection tuple if possible
 	local newFocusHost = FocusHost.create(hostRef)

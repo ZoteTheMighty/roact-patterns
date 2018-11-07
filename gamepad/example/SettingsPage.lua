@@ -7,32 +7,17 @@ local VerticalButtonList = require(script.Parent.VerticalButtonList)
 
 local e = Roact.createElement
 
-local options = {
-	{
-		text = "Resolution"
-	},
-	{
-		text = "Quality"
-	},
-	{
-		text = "Anti-Aliasing"
-	},
-	{
-		text = "Depth of Field"
-	},
-	{
-		text = "Motion Blur"
-	},
-}
+local SettingsPage = Roact.Component:extend("SettingsPage")
 
-local function SettingsPageDisplay(props)
+function SettingsPage:render()
+	local options = self.props.options
+
 	return e("Frame", {
 		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundColor3 = Color3.new(0.1, 0.2, 0.1),
 	}, {
 		Buttons = e(VerticalButtonList, {
 			-- TODO: Allow focus redirection so we can avoid this prop drilling
-			focusGroupId = props.focusGroupId,
 			buttons = options,
 
 			-- FIXME: drilling :/
@@ -43,4 +28,4 @@ local function SettingsPageDisplay(props)
 	})
 end
 
-return SettingsPageDisplay
+return SettingsPageGameplay

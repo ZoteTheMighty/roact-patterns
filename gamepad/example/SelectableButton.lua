@@ -39,10 +39,10 @@ function SelectableButton:render()
 			We'll overwrite nil defaults with ourselves, so that automatic
 			gui navigation won't kick in unexpectedly
 		]]
-		NextSelectionLeft = self.ref,
-		NextSelectionRight = self.ref,
-		NextSelectionUp = self.ref,
-		NextSelectionDown = self.ref,
+		-- NextSelectionLeft = self.ref,
+		-- NextSelectionRight = self.ref,
+		-- NextSelectionUp = self.ref,
+		-- NextSelectionDown = self.ref,
 
 		[Roact.Event.SelectionGained] = function()
 			if onSelectionGained ~= nil then
