@@ -168,4 +168,8 @@ function FocusHost.giveFocus(focusHost)
 	end
 end
 
+function FocusHost.getHostRef(focusHost)
+	return focusHost[InternalData].host
+end
+
 return FocusHost

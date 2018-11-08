@@ -15,35 +15,35 @@ local e = Roact.createElement
 local ViewPager = Roact.Component:extend("")
 
 function ViewPager:init()
+	local pages = self.props.pages
+
 	self.navRef = self.props[Roact.Ref] or Roact.createRef()
 	self.pageRef = Roact.createRef()
 
 	self.navController = self._context[Gamepad]
 
+	self.navRules = {
+		[Enum.KeyCode.ButtonL1] = function(action, inputState)
+			if inputState == Enum.UserInputState.Begin then
+				local target = (self.state.currentIndex - 1 < 1) and #pages or self.state.currentIndex - 1
+				self:setState({
+					currentIndex = target
+				})
+			end
+		end,
+		[Enum.KeyCode.ButtonR1] = function(action, inputState)
+			if inputState == Enum.UserInputState.Begin then
+				local target = (self.state.currentIndex + 1 > #pages) and 1 or self.state.currentIndex + 1
+				self:setState({
+					currentIndex = target
+				})
+			end
+		end,
+	}
+
 	self:setState({
 		currentIndex = 1,
 	})
-
-	local pages = self.props.pages
-	self.tabLeft = function(action, inputState)
-		if inputState == Enum.UserInputState.Begin then
-			local target = (self.state.currentIndex - 1 < 1) and #pages or self.state.currentIndex - 1
-			self:setState({
-				currentIndex = target
-			})
-			self.navController:navigateTo(self.pageRef)
-		end
-	end
-
-	self.tabRight = function(action, inputState)
-		if inputState == Enum.UserInputState.Begin then
-			local target = (self.state.currentIndex + 1 > #pages) and 1 or self.state.currentIndex + 1
-			self:setState({
-				currentIndex = target
-			})
-			self.navController:navigateTo(self.pageRef)
-		end
-	end
 end
 
 function ViewPager:render()
@@ -52,24 +52,17 @@ function ViewPager:render()
 
 	local currentIndex = self.state.currentIndex
 
-	local navRules = {
-		[Enum.KeyCode.ButtonL1] = self.tabLeft,
-		[Enum.KeyCode.ButtonR1] = self.tabRight,
-	}
-
 	local navChildren = {
 		["$FocusGroup"] = e(FocusGroup, {
 			host = self.navRef,
 			persist = true,
-			navRules = navRules
+			navRules = self.navRules
 		}),
 		["$Layout"] = e("UIListLayout", {
 			FillDirection = Enum.FillDirection.Horizontal,
 			SortOrder = Enum.SortOrder.LayoutOrder,
 		}),
 	}
-
-	local pageChildren = {}
 
 	for index, page in ipairs(pages) do
 		local backgroundColor = currentIndex == index and Color3.new(1, 0, 0) or Color3.new(0, 0, 0)
@@ -88,14 +81,6 @@ function ViewPager:render()
 				end
 			},
 		})
-
-		if index == currentIndex then
-			pageChildren[page] = renderPage(page, self.pageRef, assign({
-				[Enum.KeyCode.ButtonB] = function()
-					self.navController:navigateTo(self.navRef)
-				end,
-			}, navRules))
-		end
 	end
 
 	return e("Frame", {
@@ -112,7 +97,14 @@ function ViewPager:render()
 			Size = UDim2.new(1, 0, 1, -100),
 			Position = UDim2.new(0, 0, 0, 100),
 			BackgroundTransparency = 1,
-		}, pageChildren)
+		}, {
+			Page = renderPage(pages[currentIndex], self.pageRef, assign({
+				-- Back button navigation rule
+				[Enum.KeyCode.ButtonB] = function()
+					self.navController:navigateTo(self.navRef)
+				end,
+			}, self.navRules)),
+		})
 	})
 end
 

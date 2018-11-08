@@ -17,25 +17,25 @@ end
 
 function FocusGroup:didMount()
 	local host = self.props.host
+
 	local default = self.props.default
 	local persist = self.props.persist
-
 	local navRules = self.props.navRules
 
-	local focusHost = self.nav:mountFocusHost(host)
+	self.focusHost = Gamepad.createFocusHost(host)
 
-	focusHost:setDefault(default)
-	focusHost:setPersist(persist)
+	self.focusHost:setDefault(default)
+	self.focusHost:setPersist(persist)
 
 	for button, handler in pairs(navRules) do
-		focusHost:setNavRule(tostring(button), handler, button)
+		self.focusHost:setNavRule(tostring(button), handler, button)
 	end
+
+	self.nav:mountFocusHost(self.focusHost)
 end
 
 function FocusGroup:willUnmount()
-	local host = self.props.host
-
-	self.nav:unmountFocusHost(host)
+	self.nav:unmountFocusHost(self.focusHost)
 end
 
 return FocusGroup

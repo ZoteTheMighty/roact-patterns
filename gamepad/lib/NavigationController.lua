@@ -10,18 +10,18 @@ function NavigationController.create()
 	}, NavigationController)
 end
 
-function NavigationController:mountFocusHost(hostRef)
+function NavigationController:mountFocusHost(focusHost)
+	local hostRef = FocusHost.getHostRef(focusHost)
+
 	assert(self.__focusHosts[hostRef] == nil, "Focus host already registered for " .. tostring(hostRef))
 	assert(typeof(hostRef) == "table", "hostRef must be a ref but was " .. typeof(hostRef))
 
-	-- TODO: Support selection tuple if possible
-	local newFocusHost = FocusHost.create(hostRef)
-	self.__focusHosts[hostRef] = newFocusHost
-
-	return newFocusHost
+	self.__focusHosts[hostRef] = focusHost
 end
 
-function NavigationController:unmountFocusHost(hostRef)
+function NavigationController:unmountFocusHost(focusHost)
+	local hostRef = FocusHost.getHostRef(focusHost)
+
 	assert(self.__focusHosts[hostRef] ~= nil, "No focus host registered for " .. tostring(hostRef))
 
 	if self.__currentFocus == hostRef then
