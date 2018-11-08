@@ -22,6 +22,19 @@ function SettingsMenu:init()
 	self.navRef = Roact.createRef()
 end
 
+--[[
+	WHAT I LIKE about this modified approach:
+		Focus Group is more like a real component
+		Nav rules are specified more intuitively, easier to pass along
+
+	WHAT I HATE about this modified approach:
+		Selection ownership is still hard to define; that hasn't been fixed at all
+		Forwarding refs remains awkward and opaque
+		ViewPager relies on pages being focus groups (which maybe makes sense?) but has
+			no way to enforce it
+		Auto-default logic is scary and flaky and should die
+]]
+
 function SettingsMenu:render()
 
 	return e(RootFrame, {
