@@ -36,7 +36,6 @@ end
 
 function NavigationController:navigateTo(newFocusRef)
 	if self.__focusHosts[newFocusRef] == nil then
-		-- TODO: Is it safe to error here? Or is a warning actually okay?
 		warn("No focus host registered for " .. tostring(newFocusRef))
 
 		return

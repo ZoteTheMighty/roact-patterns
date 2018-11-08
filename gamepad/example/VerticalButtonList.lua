@@ -52,7 +52,6 @@ function ButtonList:render()
 		local buttonId = ("%s_%s"):format(index, button.text)
 
 		children[buttonId] = Roact.createElement(SelectableButton, {
-			selectionId = index,
 			onSelectionGained = function()
 				onButtonSelected(index)
 			end,

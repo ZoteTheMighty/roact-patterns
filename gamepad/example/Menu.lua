@@ -51,23 +51,18 @@ function SettingsMenu:render()
 				"Display",
 				"Gameplay",
 			},
-			renderPage = function(id, forwardRef, navRules)
+			renderPage = function(id, props)
 				local component
+
 				if id == "Audio" then
 					component = SettingsPageAudio
 				elseif id == "Display" then
 					component = SettingsPageDisplay
 				elseif id == "Gameplay" then
 					component = SettingsPageGameplay
-				else
-					error("aw dang")
 				end
 
-				return e(component, {
-					navRules = navRules,
-
-					[Roact.Ref] = forwardRef,
-				})
+				return e(component, props)
 			end,
 
 			[Roact.Ref] = self.navRef,

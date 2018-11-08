@@ -113,7 +113,6 @@ end
 
 local FocusHost = {}
 
--- TODO: Should we let this be created by the user and passed to the navigation controller?
 function FocusHost.create(host)
 	assert(typeof(host) == "table", "Bad arg #1: host must be a Roact ref")
 

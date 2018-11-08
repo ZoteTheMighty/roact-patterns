@@ -29,6 +29,7 @@ function ViewPager:init()
 				self:setState({
 					currentIndex = target
 				})
+				self.navController:navigateTo(self.pageRef)
 			end
 		end,
 		[Enum.KeyCode.ButtonR1] = function(action, inputState)
@@ -37,6 +38,7 @@ function ViewPager:init()
 				self:setState({
 					currentIndex = target
 				})
+				self.navController:navigateTo(self.pageRef)
 			end
 		end,
 	}
@@ -98,12 +100,16 @@ function ViewPager:render()
 			Position = UDim2.new(0, 0, 0, 100),
 			BackgroundTransparency = 1,
 		}, {
-			Page = renderPage(pages[currentIndex], self.pageRef, assign({
-				-- Back button navigation rule
-				[Enum.KeyCode.ButtonB] = function()
-					self.navController:navigateTo(self.navRef)
-				end,
-			}, self.navRules)),
+			[tostring(pages[currentIndex])] = renderPage(pages[currentIndex], {
+				[Roact.Ref] = self.pageRef,
+
+				navRules = assign({
+					-- Back button navigation rule
+					[Enum.KeyCode.ButtonB] = function()
+						self.navController:navigateTo(self.navRef)
+					end,
+				}, self.navRules),
+			}),
 		})
 	})
 end
