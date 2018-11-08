@@ -33,7 +33,7 @@ local function SettingsPageDisplay(props)
 		Buttons = e(VerticalButtonList, {
 			buttons = options,
 
-			onBack = props.onBack,
+			additionalNavRules = props.navRules,
 
 			[Roact.Ref] = props[Roact.Ref]
 		})

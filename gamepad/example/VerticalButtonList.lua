@@ -3,26 +3,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Modules = ReplicatedStorage.Modules
 
 local Roact = require(Modules.Roact)
-local Gamepad = require(Modules.Gamepad)
 
 local SelectableButton = require(script.Parent.SelectableButton)
+local FocusGroup = require(script.Parent.FocusGroup)
 
--- This is a handy trick to allow us to reference refs before we've actually
--- rendered anything, and without duplicating rendering logic!
-local function createRefCache()
-	local refCache = {}
-
-	setmetatable(refCache, {
-		__index = function(_, key)
-			local newRef = Roact.createRef()
-			refCache[key] = newRef
-
-			return newRef
-		end,
-	})
-
-	return refCache
-end
+local createRefCache = require(script.Parent.createRefCache)
 
 local function noop()
 end
@@ -40,9 +25,10 @@ function ButtonList:render()
 	local selectionLeft = self.props.selectionLeft
 	local selectionRight = self.props.selectionRight
 
+	local additionalNavRules = self.props.additionalNavRules
+
 	local onButtonActivated = self.props.onButtonActivated or noop
 	local onButtonSelected = self.props.onButtonSelected or noop
-	local onBack = self.props.onBack
 
 	local children = {
 		["$Layout"] = Roact.createElement("UIListLayout", {
@@ -50,13 +36,11 @@ function ButtonList:render()
 			FillDirection = Enum.FillDirection.Vertical,
 			HorizontalAlignment = Enum.HorizontalAlignment.Center,
 		}),
-		["$FocusGroup"] = Roact.createElement(Gamepad.FocusGroup, {
+		["$FocusGroup"] = Roact.createElement(FocusGroup, {
 			host = self.ref,
-			configureFocus = function(focusHost)
-				focusHost:setDefault(self.childRefs[1])
-					:setPersist(true)
-					:setNavRule("back", onBack, Enum.KeyCode.ButtonB)
-			end
+			default = self.childRefs[1],
+			persist = true,
+			navRules = additionalNavRules,
 		}),
 	}
 

@@ -17,7 +17,7 @@ local SettingsMenu = Roact.Component:extend("SettingsMenu")
 
 function SettingsMenu:init()
 	self.navigationController = Gamepad.createNavigationController()
-	self._context["Navigation"] = self.navigationController
+	self._context[Gamepad] = self.navigationController
 
 	self.navRef = Roact.createRef()
 end
@@ -35,14 +35,14 @@ function SettingsMenu:render()
 		ViewPager = e(ViewPager, {
 			pages = {
 				"Audio",
-				"Video",
+				"Display",
 				"Gameplay",
 			},
-			renderPage = function(id, forwardRef)
+			renderPage = function(id, forwardRef, navRules)
 				local component
 				if id == "Audio" then
 					component = SettingsPageAudio
-				elseif id == "Video" then
+				elseif id == "Display" then
 					component = SettingsPageDisplay
 				elseif id == "Gameplay" then
 					component = SettingsPageGameplay
@@ -51,9 +51,12 @@ function SettingsMenu:render()
 				end
 
 				return e(component, {
+					navRules = navRules,
+
 					[Roact.Ref] = forwardRef,
 				})
 			end,
+
 			[Roact.Ref] = self.navRef,
 		})
 	})

@@ -83,9 +83,11 @@ end
 	Actions are bound and unbound as the focusHost gains and loses focus
 ]]
 function FocusHostPrototype:setNavRule(id, callback, ...)
+	local navRuleId = ("%s.%s"):format(self[InternalData].id, id)
+
 	if callback == nil then
 		-- clear the rule
-		self[InternalData].navRules[id] = nil
+		self[InternalData].navRules[navRuleId] = nil
 
 		return self
 	end
@@ -94,14 +96,14 @@ function FocusHostPrototype:setNavRule(id, callback, ...)
 
 	local function bind()
 		-- TODO: We may need to abstract this so that RobloxScripts can use 'BindCoreAction'
-		ContextActionService:BindAction(id, callback, false, unpack(buttons))
+		ContextActionService:BindAction(navRuleId, callback, false, unpack(buttons))
 	end
 
 	local function unbind()
-		ContextActionService:UnbindAction(id)
+		ContextActionService:UnbindAction(navRuleId)
 	end
 
-	self[InternalData].navRules[id] = {
+	self[InternalData].navRules[navRuleId] = {
 		bind = bind,
 		unbind = unbind,
 	}

@@ -31,10 +31,21 @@ local function asFocusGroup(containerComponent)
 	end
 
 	function Container:didMount()
-		local host = self.props.host
-		local configureFocus = self.props.configureFocus
+		local host = self.props[Roact.Ref]
 
-		configureFocus(self.nav:mountFocusHost(host))
+		local default = self.props.default
+		local persist = self.props.persist
+
+		local navRules = self.props.navRules
+
+		local focusHost = self.nav:mountFocusHost(host)
+
+		focusHost:setDefault(default)
+		focusHost:setPersist(persist)
+
+		for button, handler in pairs(navRules) do
+			focusHost:setNavRule(tostring(button), handler, button)
+		end
 	end
 
 	function Container:willUnmount()

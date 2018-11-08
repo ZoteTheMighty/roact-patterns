@@ -1,4 +1,4 @@
 return {
 	createNavigationController = require(script.NavigationController).create,
-	FocusGroup = require(script.FocusGroup),
+	createFocusHost = require(script.FocusHost).create,
 }

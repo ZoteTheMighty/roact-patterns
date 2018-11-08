@@ -5,13 +5,13 @@ local Modules = ReplicatedStorage.Modules
 
 local Roact = require(Modules.Roact)
 
-local SettingsMenu = require(script.SettingsMenu)
+local Menu = require(script.Menu)
 
 local e = Roact.createElement
 
 local function App(props)
 	return e("ScreenGui", nil, {
-		Menu = e(SettingsMenu),
+		Menu = e(Menu),
 	})
 end
 

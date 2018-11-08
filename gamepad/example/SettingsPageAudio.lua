@@ -24,8 +24,7 @@ local function SettingsPageAudio(props)
 		Buttons = e(VerticalButtonList, {
 			buttons = options,
 
-			onBack = props.onBack,
-			outerNavRules = props.outerNavRules,
+			additionalNavRules = props.navRules,
 
 			[Roact.Ref] = props[Roact.Ref]
 		})

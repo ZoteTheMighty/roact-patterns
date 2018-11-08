@@ -6,6 +6,9 @@ local Roact = require(Modules.Roact)
 local Gamepad = require(Modules.Gamepad)
 
 local SelectableButton = require(script.Parent.SelectableButton)
+local FocusGroup = require(script.Parent.FocusGroup)
+
+local assign = require(script.Parent.assign)
 
 local e = Roact.createElement
 
@@ -15,27 +18,31 @@ function ViewPager:init()
 	self.navRef = self.props[Roact.Ref] or Roact.createRef()
 	self.pageRef = Roact.createRef()
 
-	self.navController = self._context["Navigation"]
+	self.navController = self._context[Gamepad]
 
 	self:setState({
 		currentIndex = 1,
 	})
 
 	local pages = self.props.pages
-	self.tabLeftNavRule = function()
-		local target = (self.state.currentIndex - 1 < 1) and #pages or self.state.currentIndex - 1
-		self:setState({
-			currentIndex = target
-		})
-		self.navController:navigateTo(self.pageRef)
+	self.tabLeft = function(action, inputState)
+		if inputState == Enum.UserInputState.Begin then
+			local target = (self.state.currentIndex - 1 < 1) and #pages or self.state.currentIndex - 1
+			self:setState({
+				currentIndex = target
+			})
+			self.navController:navigateTo(self.pageRef)
+		end
 	end
 
-	self.tabRightNavRule = function()
-		local target = (self.state.currentIndex + 1 > #pages) and 1 or self.state.currentIndex + 1
-		self:setState({
-			currentIndex = target
-		})
-		self.navController:navigateTo(self.pageRef)
+	self.tabRight = function(action, inputState)
+		if inputState == Enum.UserInputState.Begin then
+			local target = (self.state.currentIndex + 1 > #pages) and 1 or self.state.currentIndex + 1
+			self:setState({
+				currentIndex = target
+			})
+			self.navController:navigateTo(self.pageRef)
+		end
 	end
 end
 
@@ -45,13 +52,16 @@ function ViewPager:render()
 
 	local currentIndex = self.state.currentIndex
 
+	local navRules = {
+		[Enum.KeyCode.ButtonL1] = self.tabLeft,
+		[Enum.KeyCode.ButtonR1] = self.tabRight,
+	}
+
 	local navChildren = {
-		["$FocusGroup"] = e(Gamepad.FocusGroup, {
+		["$FocusGroup"] = e(FocusGroup, {
 			host = self.navRef,
-			configureFocus = function(focusHost)
-				focusHost:setNavRule("tabLeft", self.tabLeftNavRule, Enum.KeyCode.ButtonL1)
-				focusHost:setNavRule("tabRight", self.tabRightNavRule, Enum.KeyCode.ButtonR1)
-			end,
+			persist = true,
+			navRules = navRules
 		}),
 		["$Layout"] = e("UIListLayout", {
 			FillDirection = Enum.FillDirection.Horizontal,
@@ -59,15 +69,7 @@ function ViewPager:render()
 		}),
 	}
 
-	local pageChildren = {
-		-- ["$FocusGroup"] = e(Gamepad.FocusGroup, {
-		-- 	host = self.pageRef,
-		-- 	configureFocus = function(focusHost)
-		-- 		focusHost:setNavRule("tabLeft", self.tabLeftNavRule, Enum.KeyCode.ButtonL1)
-		-- 		focusHost:setNavRule("tabRight", self.tabRightNavRule, Enum.KeyCode.ButtonR1)
-		-- 	end,
-		-- })
-	}
+	local pageChildren = {}
 
 	for index, page in ipairs(pages) do
 		local backgroundColor = currentIndex == index and Color3.new(1, 0, 0) or Color3.new(0, 0, 0)
@@ -88,7 +90,11 @@ function ViewPager:render()
 		})
 
 		if index == currentIndex then
-			pageChildren.CurrentPage = renderPage(page, self.pageRef)
+			pageChildren[page] = renderPage(page, self.pageRef, assign({
+				[Enum.KeyCode.ButtonB] = function()
+					self.navController:navigateTo(self.navRef)
+				end,
+			}, navRules))
 		end
 	end
 
