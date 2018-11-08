@@ -9,6 +9,7 @@ local SelectableButton = require(script.Parent.SelectableButton)
 local FocusGroup = require(script.Parent.FocusGroup)
 
 local assign = require(script.Parent.assign)
+local createRefCache = require(script.Parent.createRefCache)
 
 local e = Roact.createElement
 
@@ -21,6 +22,7 @@ function ViewPager:init()
 	self.pageRef = Roact.createRef()
 
 	self.navController = self._context[Gamepad]
+	self.navSelectionTuple = createRefCache()
 
 	self.navRules = {
 		[Enum.KeyCode.ButtonL1] = function(action, inputState)
@@ -78,6 +80,8 @@ function ViewPager:render()
 				Text = page, -- TODO: need more than just string, probably
 				LayoutOrder = index,
 				BackgroundColor3 = backgroundColor,
+
+				[Roact.Ref] = self.navSelectionTuple[index],
 				[Roact.Event.Activated] = function()
 					self.navController:navigateTo(self.pageRef)
 				end

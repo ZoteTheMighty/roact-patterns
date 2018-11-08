@@ -17,12 +17,13 @@ end
 
 function FocusGroup:didMount()
 	local host = self.props.host
+	local selectionChildren = self.props.selectionChildren
 
 	local default = self.props.default
 	local persist = self.props.persist
 	local navRules = self.props.navRules
 
-	self.focusHost = Gamepad.createFocusHost(host)
+	self.focusHost = Gamepad.createFocusHost(host, selectionChildren)
 
 	self.focusHost:setDefault(default)
 	self.focusHost:setPersist(persist)

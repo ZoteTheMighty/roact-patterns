@@ -25,8 +25,8 @@ function NavigationController:unmountFocusHost(focusHost)
 	assert(self.__focusHosts[hostRef] ~= nil, "No focus host registered for " .. tostring(hostRef))
 
 	if self.__currentFocus == hostRef then
-		-- TODO: Is there a more graceful way to handle unmounting the thing with focus?
-		-- It may be correct behavior after all
+		-- TODO: Should we provide a hook so that focusHosts can navigate somewhere else
+		-- if they get unmounted while focused?
 		warn("Unmounting currently-focused group")
 		FocusHost.removeFocus(self.__focusHosts[self.__currentFocus])
 	end
@@ -36,7 +36,7 @@ end
 
 function NavigationController:navigateTo(newFocusRef)
 	if self.__focusHosts[newFocusRef] == nil then
-		warn("No focus host registered for " .. tostring(newFocusRef))
+		warn("No focus host mounted for " .. tostring(newFocusRef))
 
 		return
 	end

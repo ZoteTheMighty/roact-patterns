@@ -52,17 +52,15 @@ function SettingsMenu:render()
 				"Gameplay",
 			},
 			renderPage = function(id, props)
-				local component
-
 				if id == "Audio" then
-					component = SettingsPageAudio
+					return e(SettingsPageAudio, props)
 				elseif id == "Display" then
-					component = SettingsPageDisplay
+					return e(SettingsPageDisplay, props)
 				elseif id == "Gameplay" then
-					component = SettingsPageGameplay
+					return e(SettingsPageGameplay, props)
 				end
 
-				return e(component, props)
+				error("Unknown page id")
 			end,
 
 			[Roact.Ref] = self.navRef,

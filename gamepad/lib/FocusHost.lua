@@ -34,6 +34,9 @@ local function isPersistedSelectionValid(instance)
 	return instance:IsDescendantOf(game)
 end
 
+--[[
+	THIS IS BAD AND SHOULD PROBABLY BE DITCHED
+]]
 local function findDefaultSelection(host)
 	if host.current ~= nil then
 		for _, object in ipairs(host.current:GetChildren()) do
@@ -42,6 +45,16 @@ local function findDefaultSelection(host)
 			end
 		end
 	end
+end
+
+local function unwrapRefList(refList)
+	local result = {}
+
+	for _, ref in pairs(refList) do
+		result[#result + 1] = ref.current
+	end
+
+	return unpack(result)
 end
 
 local FocusHostPrototype = {}
@@ -113,13 +126,16 @@ end
 
 local FocusHost = {}
 
-function FocusHost.create(host)
+function FocusHost.create(host, selectionChildren)
 	assert(typeof(host) == "table", "Bad arg #1: host must be a Roact ref")
+	assert(selectionChildren == nil or typeof(selectionChildren) == "table",
+		"Bad arg #2: optional arg selectionChildren must be a table of refs")
 
 	return setmetatable({
 		[InternalData] = {
 			id = HttpService:GenerateGUID(false),
 			host = host,
+			selectionChildren = selectionChildren,
 
 			defaultSelection = nil,
 			persist = false,
@@ -146,7 +162,11 @@ end
 function FocusHost.giveFocus(focusHost)
 	local internalData = focusHost[InternalData]
 
-	GuiService:AddSelectionParent(internalData.id, internalData.host.current)
+	if internalData.selectionChildren == nil then
+		GuiService:AddSelectionParent(internalData.id, internalData.host.current)
+	else
+		GuiService:AddSelectionTuple(internalData.id, unwrapRefList(internalData.selectionChildren))
+	end
 
 	if internalData.persist and isPersistedSelectionValid(internalData.persistedSelection) then
 		GuiService.SelectedObject = internalData.persistedSelection
