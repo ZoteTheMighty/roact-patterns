@@ -51,7 +51,12 @@ function SettingsMenu:render()
 				"Display",
 				"Gameplay",
 			},
-			renderPage = function(id, props)
+			renderPage = function(id, pageRef, navRules)
+				local props = {
+					[Roact.Ref] = pageRef,
+					navRules = navRules,
+				}
+
 				if id == "Audio" then
 					return e(SettingsPageAudio, props)
 				elseif id == "Display" then

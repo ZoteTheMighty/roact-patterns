@@ -28,7 +28,9 @@ function NavigationController:unmountFocusHost(focusHost)
 		-- TODO: Should we provide a hook so that focusHosts can navigate somewhere else
 		-- if they get unmounted while focused?
 		warn("Unmounting currently-focused group")
+
 		FocusHost.removeFocus(self.__focusHosts[self.__currentFocus])
+		self.__currentFocus = nil
 	end
 
 	self.__focusHosts[hostRef] = nil

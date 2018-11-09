@@ -93,6 +93,13 @@ function ViewPager:render()
 		})
 	end
 
+	local navRules = assign({
+		-- Back button navigation rule
+		[Enum.KeyCode.ButtonB] = function()
+			self.navController:navigateTo(self.navRef)
+		end,
+	}, self.navRules)
+
 	return e("Frame", {
 		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundTransparency = 1,
@@ -108,16 +115,7 @@ function ViewPager:render()
 			Position = UDim2.new(0, 0, 0, 100),
 			BackgroundTransparency = 1,
 		}, {
-			[tostring(pages[currentIndex])] = renderPage(pages[currentIndex], {
-				[Roact.Ref] = self.pageRef,
-
-				navRules = assign({
-					-- Back button navigation rule
-					[Enum.KeyCode.ButtonB] = function()
-						self.navController:navigateTo(self.navRef)
-					end,
-				}, self.navRules),
-			}),
+			[tostring(pages[currentIndex])] = renderPage(pages[currentIndex], self.pageRef, navRules),
 		})
 	})
 end

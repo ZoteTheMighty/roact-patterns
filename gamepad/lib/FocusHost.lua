@@ -7,8 +7,6 @@ local Symbol = require(script.Parent.Symbol)
 --[[
 	Features to implement:
 	* support multiple sets of nav rules
-		* in other words, allow a parent to have special navigation rules active
-			even when child group has focus
 		* there are a number of ways to go about this. Maybe add method to inherit
 			parent nav rules?
 	* Focus redirection, or allow FocusHosts with other FocusHosts as children
@@ -39,7 +37,7 @@ end
 local function findDefaultSelection(host)
 	if host.current ~= nil then
 		for _, object in ipairs(host.current:GetChildren()) do
-			if object:IsA("GuiObject") then
+			if object:IsA("GuiObject") and object.Selectable then
 				return object
 			end
 		end
@@ -67,12 +65,10 @@ FocusHostPrototype.__tostring = function(self)
 	end
 	navRulesString = navRulesString .. " }"
 
-	local onFocus = internalData.persists and internalData.lastSelected or internalData.defaultSelection
-
-	return ("FocusHost(\n\tid: %s,\n\thost: %s,\n\tonFocus: %s,\n\tnavRules: %s\n)"):format(
+	return ("FocusHost(\n\tid: %s,\n\thost: %s,\n\tlastSelected: %s,\n\tnavRules: %s\n)"):format(
 		internalData.id,
 		tostring(internalData.host),
-		tostring(onFocus),
+		tostring(internalData.lastSelected),
 		navRulesString
 	)
 end
@@ -91,9 +87,8 @@ function FocusHostPrototype:setSelectionRule(selectionRule)
 end
 
 --[[
-	More ergonomic wrapper around context action service.
-
-	Actions are bound and unbound as the focusHost gains and loses focus
+	More ergonomic wrapper around context action service. Actions are
+	bound and unbound as the focusHost gains and loses focus.
 ]]
 function FocusHostPrototype:setNavRule(id, callback, ...)
 	local navRuleId = ("%s.%s"):format(self[InternalData].id, id)
@@ -177,10 +172,9 @@ function FocusHost.giveFocus(focusHost)
 	else
 		local default = findDefaultSelection(internalData.host)
 		if default ~= nil then
-			warn("Using kinda-scary default selection logic")
 			GuiService.SelectedObject = default
 		else
-			warn("No default selection exists, and none could be found")
+			warn(("No default selection exists for host %s, and none could be found"):format(internalData.host))
 		end
 	end
 
