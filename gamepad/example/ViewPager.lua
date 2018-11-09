@@ -24,6 +24,9 @@ function ViewPager:init()
 	self.navController = self._context[Gamepad]
 	self.navSelectionTuple = createRefCache()
 
+	self.selectionRule = function(lastSelected)
+		return self.navSelectionTuple[self.state.currentIndex].current
+	end
 	self.navRules = {
 		[Enum.KeyCode.ButtonL1] = function(action, inputState)
 			if inputState == Enum.UserInputState.Begin then
@@ -59,8 +62,9 @@ function ViewPager:render()
 	local navChildren = {
 		["$FocusGroup"] = e(FocusGroup, {
 			host = self.navRef,
-			persist = true,
-			navRules = self.navRules
+			navRules = self.navRules,
+			selectionChildren = self.navSelectionTuple,
+			selectionRule = self.selectionRule,
 		}),
 		["$Layout"] = e("UIListLayout", {
 			FillDirection = Enum.FillDirection.Horizontal,

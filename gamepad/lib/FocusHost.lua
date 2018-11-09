@@ -11,7 +11,6 @@ local Symbol = require(script.Parent.Symbol)
 			even when child group has focus
 		* there are a number of ways to go about this. Maybe add method to inherit
 			parent nav rules?
-	* Support selection tuple in addition to selection parent
 	* Focus redirection, or allow FocusHosts with other FocusHosts as children
 
 	Misc TODO:
@@ -68,7 +67,7 @@ FocusHostPrototype.__tostring = function(self)
 	end
 	navRulesString = navRulesString .. " }"
 
-	local onFocus = internalData.persists and internalData.persistedSelection or internalData.defaultSelection
+	local onFocus = internalData.persists and internalData.lastSelected or internalData.defaultSelection
 
 	return ("FocusHost(\n\tid: %s,\n\thost: %s,\n\tonFocus: %s,\n\tnavRules: %s\n)"):format(
 		internalData.id,
@@ -78,14 +77,15 @@ FocusHostPrototype.__tostring = function(self)
 	)
 end
 
-function FocusHostPrototype:setDefault(default)
-	self[InternalData].defaultSelection = default
+--[[
+	Sets a selection rule that is used to determine what item to select
+	when the FocusHost gains focus. This is expected to be a function with
+	the following signature:
 
-	return self
-end
-
-function FocusHostPrototype:setPersist(persist)
-	self[InternalData].persist = persist
+		function selectionRule(lastSelected: Instance) -> Instance
+]]
+function FocusHostPrototype:setSelectionRule(selectionRule)
+	self[InternalData].selectionRule = selectionRule
 
 	return self
 end
@@ -137,9 +137,8 @@ function FocusHost.create(host, selectionChildren)
 			host = host,
 			selectionChildren = selectionChildren,
 
-			defaultSelection = nil,
-			persist = false,
-			persistedSelection = nil,
+			selectionRule = nil,
+			lastSelected = nil,
 			navRules = {},
 		}
 	}, FocusHostPrototype)
@@ -148,8 +147,8 @@ end
 function FocusHost.removeFocus(focusHost)
 	local internalData = focusHost[InternalData]
 
-	if internalData.persist then
-		internalData.persistedSelection = GuiService.SelectedObject
+	if internalData.selectionRule ~= nil then
+		internalData.lastSelected = GuiService.SelectedObject
 	end
 
 	GuiService:RemoveSelectionGroup(internalData.id, internalData.host.current)
@@ -168,14 +167,17 @@ function FocusHost.giveFocus(focusHost)
 		GuiService:AddSelectionTuple(internalData.id, unwrapRefList(internalData.selectionChildren))
 	end
 
-	if internalData.persist and isPersistedSelectionValid(internalData.persistedSelection) then
-		GuiService.SelectedObject = internalData.persistedSelection
-	elseif internalData.defaultSelection ~= nil then
-		GuiService.SelectedObject = internalData.defaultSelection.current
+	local persistedSelection = nil
+	if internalData.selectionRule ~= nil then
+		persistedSelection = internalData.selectionRule(internalData.lastSelected)
+	end
+
+	if isPersistedSelectionValid(persistedSelection) then
+		GuiService.SelectedObject = persistedSelection
 	else
 		local default = findDefaultSelection(internalData.host)
 		if default ~= nil then
-			warn("Using sub-optimal default selection logic")
+			warn("Using kinda-scary default selection logic")
 			GuiService.SelectedObject = default
 		else
 			warn("No default selection exists, and none could be found")

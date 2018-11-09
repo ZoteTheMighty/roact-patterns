@@ -39,9 +39,14 @@ function ButtonList:render()
 		["$FocusGroup"] = Roact.createElement(FocusGroup, {
 			host = self.ref,
 			selectionChildren = self.childRefs,
-			default = self.childRefs[1],
-			persist = true,
 			navRules = additionalNavRules,
+			selectionRule = function(lastSelected)
+				if lastSelected == nil then
+					return self.childRefs[1].current
+				end
+
+				return lastSelected
+			end,
 		}),
 	}
 

@@ -27,10 +27,14 @@ function SettingsPageAudio:render()
 	}, {
 		FocusGroup = e(FocusGroup, {
 			host = forwardRef,
-			default = self.volumeRef,
-			persist = true,
-
 			navRules = navRules,
+			selectionRule = function(lastSelected)
+				if lastSelected == nil then
+					return self.volumeRef.current
+				end
+
+				return lastSelected
+			end,
 		}),
 		VolumeOption = e(SelectableButton, {
 			style = {

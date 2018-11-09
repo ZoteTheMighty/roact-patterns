@@ -6,6 +6,9 @@ local Roact = require(Modules.Roact)
 
 local assign = require(script.Parent.assign)
 
+local function noop()
+end
+
 local RootFrame = Roact.Component:extend("RootFrame")
 
 function RootFrame:init()
@@ -13,8 +16,8 @@ function RootFrame:init()
 end
 
 function RootFrame:render()
-	local rooted = self.props.rooted
-	local unrooted = self.props.unrooted
+	local rooted = self.props.rooted or noop
+	local unrooted = self.props.unrooted or noop
 
 	local frameProps = {
 		[Roact.Event.AncestryChanged] = function(object)
