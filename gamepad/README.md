@@ -1,10 +1,10 @@
 # Roact Gamepad Example
 This is an example of using gamepads in Roact. Right now, this example is built on a version of Roact that has Bindings implemented, which reduces the need for incredibly convoluted workarounds.
 
-## First Class Refs
+## First-class Refs
 First-class refs enable the use of refs to lazily bind object references, which is useful for interfacing with Roblox's gamepad API.
 
-Using a version of the Roact reconciler with bindings built into it, selection management in Roact can look like this:
+Using a version of the Roact reconciler with First-class Refs built into it, selection management in Roact can look like this:
 
 ```lua
 local TwoHalves = Roact.Component:extend("TwoHalves")
@@ -115,7 +115,7 @@ Moves focus to the `FocusHost` associated with the given host ref. This method t
 	c. Sets initial selection according to rule provided with `setSelectionRule`
 
 ## Future Development
-The tools provided by these navigation solutions should make some navigation paradigms easier to implement. In particular, the example provided shows a reasonable implementation of a view pager, with support for changing views with left and right bumpers. It also includes a component with a variable-length list of buttons, which connects those buttons together using First Class Refs.
+The tools provided by these navigation solutions should make some navigation paradigms easier to implement. In particular, the example provided shows a reasonable implementation of a view pager, with support for changing views with left and right bumpers. It also includes a component with a variable-length list of buttons, which connects those buttons together using First-class Refs.
 
 Other patterns may be more or less difficult than the ones implemented here. Further investigation is needed to identify missing features or shortcomings. Below is a short list of any currently known issues.
 
