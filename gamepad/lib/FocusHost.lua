@@ -4,26 +4,15 @@ local ContextActionService = game:GetService("ContextActionService")
 
 local Symbol = require(script.Parent.Symbol)
 
---[[
-	Features to implement:
-	* support multiple sets of nav rules
-		* there are a number of ways to go about this. Maybe add method to inherit
-			parent nav rules?
-	* Focus redirection, or allow FocusHosts with other FocusHosts as children
-
-	Misc TODO:
-	* Reconsider the naming of various pieces of this component
-]]
-
 -- Used to access a set of fields that are internal to FocusHost
 local InternalData = Symbol.named("InternalData")
 
 --[[
-	Selection persistence is in terms of actual Instances,
+	Setting initial selection is in terms of actual Instances,
 	because there's not really a way to find an associated
 	ref object for an instance when saving persisted selection
 ]]
-local function isPersistedSelectionValid(instance)
+local function isSelectionValid(instance)
 	if typeof(instance) ~= "Instance" then
 		return false
 	end
@@ -32,7 +21,7 @@ local function isPersistedSelectionValid(instance)
 end
 
 --[[
-	THIS IS BAD AND SHOULD PROBABLY BE DITCHED
+	TODO: THIS IS BAD AND SHOULD PROBABLY BE DITCHED
 ]]
 local function findDefaultSelection(host)
 	if host.current ~= nil then
@@ -167,7 +156,7 @@ function FocusHost.giveFocus(focusHost)
 		persistedSelection = internalData.selectionRule(internalData.lastSelected)
 	end
 
-	if isPersistedSelectionValid(persistedSelection) then
+	if isSelectionValid(persistedSelection) then
 		GuiService.SelectedObject = persistedSelection
 	else
 		local default = findDefaultSelection(internalData.host)
