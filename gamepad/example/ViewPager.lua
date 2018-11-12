@@ -27,7 +27,7 @@ function ViewPager:init()
 	self.selectionRule = function(lastSelected)
 		return self.navSelectionTuple[self.state.currentIndex].current
 	end
-	self.navRules = {
+	self.contextActions = {
 		[Enum.KeyCode.ButtonL1] = function(action, inputState)
 			if inputState == Enum.UserInputState.Begin then
 				local target = (self.state.currentIndex - 1 < 1) and #pages or self.state.currentIndex - 1
@@ -62,7 +62,7 @@ function ViewPager:render()
 	local navChildren = {
 		["$FocusGroup"] = e(FocusGroup, {
 			host = self.navRef,
-			navRules = self.navRules,
+			contextActions = self.contextActions,
 			selectionChildren = self.navSelectionTuple,
 			selectionRule = self.selectionRule,
 		}),
@@ -93,12 +93,12 @@ function ViewPager:render()
 		})
 	end
 
-	local navRules = assign({
+	local pageContextActions = assign({
 		-- Back button navigation rule
 		[Enum.KeyCode.ButtonB] = function()
 			self.navController:navigateTo(self.navRef)
 		end,
-	}, self.navRules)
+	}, self.contextActions)
 
 	return e("Frame", {
 		Size = UDim2.new(1, 0, 1, 0),
@@ -115,7 +115,11 @@ function ViewPager:render()
 			Position = UDim2.new(0, 0, 0, 100),
 			BackgroundTransparency = 1,
 		}, {
-			[tostring(pages[currentIndex])] = renderPage(pages[currentIndex], self.pageRef, navRules),
+			[tostring(pages[currentIndex])] = renderPage(
+				pages[currentIndex],
+				self.pageRef,
+				pageContextActions
+			),
 		})
 	})
 end

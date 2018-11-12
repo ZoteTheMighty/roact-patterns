@@ -59,17 +59,17 @@ FocusHostPrototype.__index = FocusHostPrototype
 FocusHostPrototype.__tostring = function(self)
 	local internalData = self[InternalData]
 
-	local navRulesString = "{ "
-	for navRuleId, _ in pairs(internalData.navRules) do
-		navRulesString = navRulesString .. tostring(navRuleId) .. ", "
+	local contextActionsString = "{ "
+	for contextActionId, _ in pairs(internalData.contextActions) do
+		contextActionsString = contextActionsString .. tostring(contextActionId) .. ", "
 	end
-	navRulesString = navRulesString .. " }"
+	contextActionsString = contextActionsString .. " }"
 
-	return ("FocusHost(\n\tid: %s,\n\thost: %s,\n\tlastSelected: %s,\n\tnavRules: %s\n)"):format(
+	return ("FocusHost(\n\tid: %s,\n\thost: %s,\n\tlastSelected: %s,\n\tcontextActions: %s\n)"):format(
 		internalData.id,
 		tostring(internalData.host),
 		tostring(internalData.lastSelected),
-		navRulesString
+		contextActionsString
 	)
 end
 
@@ -90,12 +90,12 @@ end
 	More ergonomic wrapper around context action service. Actions are
 	bound and unbound as the focusHost gains and loses focus.
 ]]
-function FocusHostPrototype:setNavRule(id, callback, ...)
-	local navRuleId = ("%s.%s"):format(self[InternalData].id, id)
+function FocusHostPrototype:setContextAction(id, callback, ...)
+	local contextActionId = ("%s.%s"):format(self[InternalData].id, id)
 
 	if callback == nil then
 		-- clear the rule
-		self[InternalData].navRules[navRuleId] = nil
+		self[InternalData].contextActions[contextActionId] = nil
 
 		return self
 	end
@@ -104,14 +104,14 @@ function FocusHostPrototype:setNavRule(id, callback, ...)
 
 	local function bind()
 		-- TODO: We may need to abstract this so that RobloxScripts can use 'BindCoreAction'
-		ContextActionService:BindAction(navRuleId, callback, false, unpack(buttons))
+		ContextActionService:BindAction(contextActionId, callback, false, unpack(buttons))
 	end
 
 	local function unbind()
-		ContextActionService:UnbindAction(navRuleId)
+		ContextActionService:UnbindAction(contextActionId)
 	end
 
-	self[InternalData].navRules[navRuleId] = {
+	self[InternalData].contextActions[contextActionId] = {
 		bind = bind,
 		unbind = unbind,
 	}
@@ -134,7 +134,7 @@ function FocusHost.create(host, selectionChildren)
 
 			selectionRule = nil,
 			lastSelected = nil,
-			navRules = {},
+			contextActions = {},
 		}
 	}, FocusHostPrototype)
 end
@@ -148,8 +148,8 @@ function FocusHost.removeFocus(focusHost)
 
 	GuiService:RemoveSelectionGroup(internalData.id, internalData.host.current)
 
-	for _, navRule in pairs(internalData.navRules) do
-		navRule.unbind()
+	for _, contextAction in pairs(internalData.contextActions) do
+		contextAction.unbind()
 	end
 end
 
@@ -178,8 +178,8 @@ function FocusHost.giveFocus(focusHost)
 		end
 	end
 
-	for _, navRule in pairs(internalData.navRules) do
-		navRule.bind()
+	for _, contextAction in pairs(internalData.contextActions) do
+		contextAction.bind()
 	end
 end
 

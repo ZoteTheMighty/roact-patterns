@@ -17,7 +17,7 @@ end
 
 function SettingsPageAudio:render()
 	local forwardRef = self.props[Roact.Ref]
-	local navRules = self.props.navRules
+	local contextActions = self.props.contextActions
 
 	return e("Frame", {
 		Size = UDim2.new(1, 0, 1, 0),
@@ -27,7 +27,7 @@ function SettingsPageAudio:render()
 	}, {
 		FocusGroup = e(FocusGroup, {
 			host = forwardRef,
-			navRules = navRules,
+			contextActions = contextActions,
 			selectionRule = function(lastSelected)
 				if lastSelected == nil then
 					return self.volumeRef.current

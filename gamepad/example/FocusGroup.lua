@@ -20,13 +20,13 @@ function FocusGroup:didMount()
 	local selectionChildren = self.props.selectionChildren
 
 	local selectionRule = self.props.selectionRule
-	local navRules = self.props.navRules
+	local contextActions = self.props.contextActions
 
 	self.focusHost = Gamepad.createFocusHost(host, selectionChildren)
 
 	self.focusHost:setSelectionRule(selectionRule)
-	for button, handler in pairs(navRules) do
-		self.focusHost:setNavRule(tostring(button), handler, button)
+	for button, handler in pairs(contextActions) do
+		self.focusHost:setContextAction(tostring(button), handler, button)
 	end
 
 	self.nav:mountFocusHost(self.focusHost)

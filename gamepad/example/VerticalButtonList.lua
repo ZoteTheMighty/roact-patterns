@@ -25,7 +25,7 @@ function ButtonList:render()
 	local selectionLeft = self.props.selectionLeft
 	local selectionRight = self.props.selectionRight
 
-	local additionalNavRules = self.props.additionalNavRules
+	local contextActions = self.props.contextActions
 
 	local onButtonActivated = self.props.onButtonActivated or noop
 	local onButtonSelected = self.props.onButtonSelected or noop
@@ -39,7 +39,7 @@ function ButtonList:render()
 		["$FocusGroup"] = Roact.createElement(FocusGroup, {
 			host = self.ref,
 			selectionChildren = self.childRefs,
-			navRules = additionalNavRules,
+			contextActions = contextActions,
 			selectionRule = function(lastSelected)
 				if lastSelected == nil then
 					return self.childRefs[1].current
