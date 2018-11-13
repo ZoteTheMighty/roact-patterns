@@ -117,11 +117,15 @@ Moves focus to the `FocusHost` associated with the given host ref. This method t
 ## Future Development
 The tools provided by these navigation solutions should make some navigation paradigms easier to implement. In particular, the example provided shows a reasonable implementation of a view pager, with support for changing views with left and right bumpers. It also includes a component with a variable-length list of buttons, which connects those buttons together using First-class Refs.
 
-Other patterns may be more or less difficult than the ones implemented here. Further investigation is needed to identify missing features or shortcomings. Below is a short list of any currently known issues.
+Other patterns may be more or less difficult than the ones implemented here. Further investigation is needed to identify missing features or shortcomings. Below is a short list of any currently known issues and absences.
+
+### Concerns with Current Implementation
+* Passing refs around is awkward and opaque, particularly when refs have unclear ownership. This could be addressed at the Roact level, or by establishing some convention, or by some other pattern not yet discovered.
+* The examples depend on passing a `NavigationController` through context, but then using it in `didMount`/`willUnmount`. This makes it a poor candidate for the render-prop Provider/Consumer pattern.
+* Currently, there's some fallback selection logic that's awkward and potentially flaky, and doesn't account for selection tuples at all. This should be replaced with something more thought out.
 
 ### Missing Features or Improvements
 * Some operations would benefit from being able to reverse-lookup a ref when given an instance, but since it also supports auto-navigation, the user may not have created refs for all relevant Instances.
 * Context actions use the standard ContextActionService interface, but don't provide any particular insight for determining which Instance in a group is selected. Utilities to determine which element in a list is selected when a context action is invoked are crucial to making the feature useful.
 * There needs to be an interface layer between this navigation framework and `ContextActionService`/`GuiService` that allows use of the "Core" versions of the methods and fields used. This is crucial to making it useful for internal code.
-* Passing refs around is awkward and opaque, particularly when refs have unclear ownership. This could be addressed at the Roact level, or by establishing some convention, or by some other pattern not yet discovered.
-* The examples depend on passing a `NavigationController` through context, but then using it in `didMount`/`willUnmount`. This makes it a poor candidate for the render-prop Provider/Consumer pattern.
+* It would be nice to provide a simple way to get common selection rules (defaultTo, persistOrDefaultTo)
